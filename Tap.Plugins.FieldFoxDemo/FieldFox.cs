@@ -1,9 +1,11 @@
-﻿// Author: MyName
+﻿//<copyright>
+// Author: MyName
 // Copyright:   Copyright 2018 Keysight Technologies
 //              You have a royalty-free right to use, modify, reproduce and distribute
 //              the sample application files (and/or any modified version) in any way
 //              you find useful, provided that you agree that Keysight Technologies has no
 //              warranty, obligations or liability for any sample application files.
+// </copyright>
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,15 +13,17 @@ using System.Text;
 using System.ComponentModel;
 using Keysight.Tap;
 
+// <template info>
 //Note this template assumes that you have a SCPI based instrument, and accordingly
 //extends the ScpiInstrument base class.
 
 //If you do NOT have a SCPI based instrument, you should modify this instance to extend
 //the (less powerful) Instrument base class.
+//</template info>
 
 namespace Tap.Plugins.FieldFoxDemo
 {
-    [Display("FieldFox", Group: "FieldFoxDemo", Description: "FieldFox N9917A")]
+    [Display("FieldFox", Group: "FieldFoxDemoInstruments", Description: "FieldFox N9917A")]
     [ShortName("FieldFox")]
     public class FieldFox : ScpiInstrument
     {
@@ -28,22 +32,17 @@ namespace Tap.Plugins.FieldFoxDemo
         #endregion
         public FieldFox()
         {
-            
-          //ScpiCommand("SYSTem:PRESet");
-
+            //ScpiCommand("SYSTem:PRESet");
         }
 
         public override void Open()
         {
-
             base.Open();
-
             if (!IdnString.Contains("N9"))
             {
                 Log.Error("This instrument driver does not support the connected instrument.");
                 throw new ArgumentException("Wrong instrument type.");
             }
-
         }
 
         public override void Close()
@@ -52,85 +51,100 @@ namespace Tap.Plugins.FieldFoxDemo
             base.Close();
         }
 
+        //<summary>
+        //Select the Spectrum Analyzer Instrument
+        //Activate FM Wide listening mode
+        //Tune to radio station
+        //Turn On the Pre-Amp
+        //</summary>
         public void RadioMode(double StationFrequency)
         {
-            ScpiCommand(@"INSTrument:SELect ""SA"""); //Select the Spectrum Analyser instrument
-            ScpiCommand("SENSe:MEASurement:TAListen FMW"); //Activate FM Wide listening mode
-            ScpiCommand(":SENSe:TAListen:TFReq " + StationFrequency); //Tune to radio station
-            ScpiCommand(":SENSe:POWer:RF:GAIN:STATe 1"); //Turn On the Pre-Amp
-    
+            ScpiCommand(@"INSTrument:SELect ""SA"""); 
+            ScpiCommand("SENSe:MEASurement:TAListen FMW"); 
+            ScpiCommand(":SENSe:TAListen:TFReq " + StationFrequency); 
+            ScpiCommand(":SENSe:POWer:RF:GAIN:STATe 1"); 
         }
 
+        //<summary>
+        //Set the center frequency to the value held in the CenterFrequecy
+        //<summary>
         public void SAView(double CenterFrequency)
         {
-            ScpiCommand(":SENSe:FREQuency:CENTer " + CenterFrequency); //Set the center frequency to the center frequecy
-            
-            
+            ScpiCommand(":SENSe:FREQuency:CENTer " + CenterFrequency); 
         }
 
+        //<summary>
+        //Set Start Frequency
+        //Set StopFrequency
+        //<summary>
         public void ScanStations(double StartFrequency, double StopFrequency)
         {
-            ScpiCommand(":SENS:FREQ:STAR "+StartFrequency); //Set Start Frequency
-            ScpiCommand(":SENS:FREQ:STOP "+StopFrequency); //Set StopFrequency
+            ScpiCommand(":SENS:FREQ:STAR " + StartFrequency); 
+            ScpiCommand(":SENS:FREQ:STOP " + StopFrequency); 
         }
 
         public double[] GetData()
-        { 
-            ScpiCommand("SWE:POIN 401"); //Set No. of points
-            ScpiCommand("TRAC1:TYPE AVG"); //Set trace type
+        {
+            ScpiCommand("SWE:POIN 401"); 
+            ScpiCommand("TRAC1:TYPE AVG"); 
             ScpiCommand("DISPlay:WINDow:TRACe:Y:SCALe:AUTO");
             return ScpiQuery<double[]>("TRAC1:DATA?");
         }
-
+        
+        //<summary>
+        // This function generates a list of frequencies based on the start frequency, stop frequency and number of points that are
+        // displayed on the FieldFox. These frequency values are used on the x-axis of the 'FM Spectrum View' plot and for later operations.
+        //</summary>
         public List<double> CalcFrequency(double StartFrequency, double StopFrequency)
         {
             var FrequencyStep = ((StopFrequency - StartFrequency) / (401));
             List<double> FrequencyList = new List<double>();
             FrequencyList.Add(StartFrequency);
-                   
+
             for (int runs = 0; runs < 400; runs++)
             {
                 FrequencyList.Add(FrequencyList[runs] + FrequencyStep);
             }
-
-            return FrequencyList;
+            return FrequencyList; 
         }
 
-        public double[] StationsFound(int AmplitudeCutOff, double[] MeasurementResults) 
+        //<summary>
+        // Returns a list of Amplitudes from the MeasurementResults array that have a value greater than the 'AmplitudeCutoff' variable
+        //</summary>
+        public double[] AmplitudesAboveCutoff(int AmplitudeCutOff, double[] MeasurementResults)
         {
-            var StationsFoundArray = MeasurementResults.Where(item => item >= AmplitudeCutOff).ToArray();
-       
-            return StationsFoundArray;
+            var AmplitudesAboveCutoff = MeasurementResults.Where(item => item >= AmplitudeCutOff).ToArray();
+            return AmplitudesAboveCutoff; 
         }
 
-        public List<double> FrequenciesFound(int AmplitudeCutOff, double[] MeasurementResults, List<double> FrequencyList)
+        //<summary>
+        // This function takes the array of amplitude data gathered by the fieldfox(MeasurementResults) and for any
+        // amplitude value greater than the 'AmplitudeCutOff' variable it adds the 'FrequencyList' value with the same
+        // index array to a new array called 'FrequenciesAboveCutoff'array is returned in the last step. We now have
+        // an array of Frequency values for the AmplitudesAboveCutoff array created in the previous step.
+        //</summary>
+        public List<double> FrequenciesAboveCutoff(int AmplitudeCutOff, double[] MeasurementResults, List<double> FrequencyList)
         {
-            List<double> StationFrequencyList = new List<double>();
+            List<double> FrequenciesAboveCutoff = new List<double>();
             var x = 0;
-
             foreach (double i in MeasurementResults)
-
             {
-
                 if (MeasurementResults[x] > AmplitudeCutOff)
                 {
-                    
-                    StationFrequencyList.Add(FrequencyList[x]);
+                    FrequenciesAboveCutoff.Add(FrequencyList[x]);
                     x++;
                 }
-
                 else
                 {
                     x++;
                 }
             }
-
-            return StationFrequencyList;
-
-
+            return FrequenciesAboveCutoff; 
         }
-    }
 
-    
-}
+  
+    }   
+  
+  }
+
 

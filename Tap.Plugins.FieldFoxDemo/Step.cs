@@ -14,74 +14,89 @@ using Keysight.Tap;  // Use Platform infrastructure/core components (log,TestSte
 
 namespace Tap.Plugins.FieldFoxDemo
 {
-    [Display("Step", Group: "FieldFoxDemo", Description: "Tune in to a radio station, capture data, plot graphs")]
+    [Display("FF Demo", Group: "FieldFoxDemo", Description: "Tune in to a radio station, capture data, plot graphs")]
+
     public class Step : TestStep
     {
         #region Settings
         // ToDo: Add property here for each parameter the end user should be able to change.
-        #endregion
+
 
         //Creates a UI dropdown for the variable
+        [Display("Station Frequency", Group: "DUT Setup", Order: 1)]
         [Unit("Hz", UseEngineeringPrefix: true)]
-        public double StationFrequency { get; set; } 
+        public double StationFrequency { get; set; }
+
+        [Display("Center Frequency", Group: "DUT Setup", Order: 2)]
         [Unit("Hz", UseEngineeringPrefix: true)]
         public double CenterFrequency { get; set; }
+
+        [Display("Start Frequency", Group: "DUT Setup", Order: 3)]
         [Unit("Hz", UseEngineeringPrefix: true)]
         public double StartFrequency { get; set; }
+
+        [Display("Stop Frequency", Group: "DUT Setup", Order: 4)]
         [Unit("Hz", UseEngineeringPrefix: true)]
         public double StopFrequency { get; set; }
+
+        [Display("Amplitude Cut Off", Group: "DUT Setup", Order: 5)]
         [Unit("dBm", UseEngineeringPrefix: true)]
         public int AmplitudeCutOff { get; set; }
 
-
         // Instrument Declarations (Creates dropdown in TAP GUI))
+        [Display("FieldFox", Group: "DUT", Order: 1)]
         public FieldFox FF { get; set; }
-                
+
+
+        #endregion
+
+
         public Step()
         {
             //Set default values for properties / settings.
             StationFrequency = 104.1e6;
             CenterFrequency = StationFrequency;
-            StartFrequency = 80000000;
+            StartFrequency = 88000000;
             StopFrequency = 108000000;
             AmplitudeCutOff = -80;
-
         }
-                
+
         public override void PrePlanRun()
         {
             base.PrePlanRun();
-            
         }
+
 
         public override void Run()
         {
-           FF.RadioMode(StationFrequency);
-           FF.SAView(CenterFrequency);
-           FF.ScanStations(StartFrequency, StopFrequency);
-            
+            FF.RadioMode(StationFrequency);
+            FF.SAView(CenterFrequency);
+            FF.ScanStations(StartFrequency, StopFrequency);
 
-           var MeasurementResults = FF.GetData();
+            //Initial array of amplitudes collected by the fieldfox
+            var MeasurementResults = FF.GetData();
 
+            // Initial array of frequencies evenly spaced between start and stop value
+            var FrequencyList = FF.CalcFrequency(StartFrequency, StopFrequency);
+            var FrequencyArray = FrequencyList.ToArray();
 
-           var StationsArray = FF.StationsFound(AmplitudeCutOff, MeasurementResults);
+            //Array of Amplitudes greater than the amplitue cutoff i.e. 'Stations'
+            var AmplitudesAboveCutoffArray = FF.AmplitudesAboveCutoff(AmplitudeCutOff, MeasurementResults);
+            var StationsFoundList = AmplitudesAboveCutoffArray.ToList();
 
-           var FrequencyList = FF.CalcFrequency(StartFrequency, StopFrequency);
-           var FrequencyArray = FrequencyList.ToArray(); 
-                                  
-           var FrequenciesFoundList = FF.FrequenciesFound(AmplitudeCutOff, MeasurementResults, FrequencyList);
-           var FrequenciesFoundArray = FrequenciesFoundList.ToArray();
+            // List of frquencies for each 'Station(Amplitude)' value
+            var FrequenciesFoundList = FF.FrequenciesAboveCutoff(AmplitudeCutOff, MeasurementResults, FrequencyList);
+            var FrequenciesFoundArray = FrequenciesFoundList.ToArray();
 
-
-           Results.PublishTable("FM Spectrum View", new List<string> {"Frequency", "Amplitude" },FrequencyArray, MeasurementResults);
-           Results.PublishTable("Frequencies Above Cutoff", new List<string> {"Station Frequency(Hz)", "Station Amplitude(dBm)"}, FrequenciesFoundArray, StationsArray);
-
+            Results.PublishTable("FM Spectrum View", new List<string> { "Frequency(Hz)", "Amplitude(dBm)" }, FrequencyArray, MeasurementResults);
+            Results.PublishTable("Frequencies Above Cutoff", new List<string> { "Station Frequency(Hz)", "Station Amplitude(dBm)" }, FrequenciesFoundArray, AmplitudesAboveCutoffArray);
         }
-    
 
         public override void PostPlanRun()
         {
             base.PostPlanRun();
         }
     }
+
+ 
 }
