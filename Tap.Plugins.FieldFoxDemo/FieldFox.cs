@@ -142,9 +142,200 @@ namespace Tap.Plugins.FieldFoxDemo
             return FrequenciesAboveCutoff; 
         }
 
-  
-    }   
-  
-  }
+        //<summary>
+        // Creates an array of evenly spaced channels based on the start and stop frequency, these are
+        // used later as a the reference for the AmplitudesAboveCutoff to be sorted in to.
+        //</summary>
+        public List<double> CreateChannels()
+        {
+            var step = ((108000000 - 88000000) / (100));
+            List<double> ChannelsCreated = new List<double>();
+            ChannelsCreated.Add(88000000);
+            var x = 0;
+            double stop = 88000000;
+            while (stop < 108000000)
+            {
+                ChannelsCreated.Add(ChannelsCreated[x] + step);
+                x++;
+                stop += step;
+            }
+            return ChannelsCreated;
+        }
+
+        //<summary>
+        // This Function sorts the 'FrequenciesAboveCutoff' values to into their respective channels 
+        //</summary>
+        public List<double> MapFrequencyToChannel(List<double> FrequenciesAboveCutoff, List<double> ChannelsCreated)
+        {
+            var x = 0;
+            var y = 1;
+            List<double> ChannelMappedFrequencies = new List<double>();
+            for (int i = 0; i < 100; i++)
+            {
+                var MatchFound = false;
+                if (FrequenciesAboveCutoff[x] >= ChannelsCreated[x] && FrequenciesAboveCutoff[x] <= ChannelsCreated[y])
+                {
+                    MatchFound = true;
+                }
+                if (MatchFound == true)
+                {
+                    ChannelMappedFrequencies.Add(ChannelsCreated[x]);
+                    y++;
+                    x++;
+                }
+                if (MatchFound == false)
+                {
+                    y++;
+                }
+                else if (x == FrequenciesAboveCutoff.Count - 1) //remove the -1 on next run
+                {
+                    break;
+                }
+            }
+            return ChannelMappedFrequencies;
+        }
+
+        //<summary>
+         //This function returns a list of amplitudes for the list of channels, it uses the index of the Frequency value to find the
+         //correspoding amplitude value and adds this value to an array that is returned at the end. This function in combination with the
+        // 'FrequenciesForChannels' function also ensures that the final list of Amplitude values is the same size as the final list of
+        // frequency values so that they can be plotted
+        //</summary>
+
+        public List<double> AmplitudesForChannels(List<double> AmplitudesAboveCutoff, List<double> FrequenciesMappedToChannels)
+        {
+            List<double> FinalAmplitudeList = new List<double>();
+            var length = AmplitudesAboveCutoff.Count;
+            var x = 0;
+
+            foreach (double i in FrequenciesMappedToChannels)
+                while (x <= length - 1)
+                {
+                    {
+                        FinalAmplitudeList.Add(AmplitudesAboveCutoff[FrequenciesMappedToChannels.IndexOf(i)]);
+                        x++;
+                    }
+                }
+
+            return FinalAmplitudeList;
+        }
+
+        //<summary>
+        // Returns a list of frequencies the same size as the list of amplitudes.
+        //</summary>
+        public List<double> FrequenciesForChannels(List<double> AmplitudesAboveCutoff, List<double> FrequenciesMappedToChannels)
+        {
+            List<double> FinalFrequencyList = new List<double>();
+            var length = FrequenciesMappedToChannels.Count;
+            var x = 0;
+
+            foreach (double i in AmplitudesAboveCutoff)
+                while (x <= length - 1)
+                {
+                    {
+                        FinalFrequencyList.Add(FrequenciesMappedToChannels[AmplitudesAboveCutoff.IndexOf(i)]);
+                        x++;
+                    }
+                }
+            return FinalFrequencyList;
+
+        }
+
+        //public List<double> MapFrequencyToChannel(List<double> FrequenciesAboveCutoff, List<double> ChannelsCreated)
+        //{
+        //    var x = 0;
+        //    var y = 1;
+        //    var MatchFound = false;
+
+        //    List<double> ChannelMappedFrequencies = new List<double>();
+        //    for (int i = 0; i < 100; i++)
+        //    {
+
+        //        while (MatchFound == false)
+        //        {
+        //            if (FrequenciesAboveCutoff[x] >= ChannelsCreated[x] && FrequenciesAboveCutoff[x] <= ChannelsCreated[y])
+        //            {
+        //                ChannelMappedFrequencies.Add(ChannelsCreated[x]);
+        //                MatchFound = true;
+        //            }
+        //            else
+        //            {
+        //                y++;
+
+        //            }
+        //        }
+
+        //        x++;
+        //        MatchFound = false;
+        //    }
+        //    return ChannelMappedFrequencies;
+        //}
+
+
+        //public List<double> MapToChannel(List<double> FreqienciesFoundList, List<double> ChannelsFoundList)
+
+        //{
+        //    var x = 0;
+        //    var u = 0;
+        //    var y = 1;
+        //    var z = FreqienciesFoundList.Count;
+        //    List<double> FinalStationList = new List<double>();
+        //    foreach (double i in ChannelsFoundList)
+
+        //        if (FreqienciesFoundList[x] >= ChannelsFoundList[x] && FreqienciesFoundList[x] <= ChannelsFoundList[y])
+        //        {
+
+
+        //            if (x < (FreqienciesFoundList.Count - 1) )
+        //            {
+        //                //x = FreqienciesFoundList.Count;
+        //                FinalStationList.Add(ChannelsFoundList[x]);
+        //                x++;
+        //                u++;
+        //            }
+
+        //            else if ( x >= (FreqienciesFoundList.Count - 1))
+        //            {
+        //                FinalStationList.Add(ChannelsFoundList[u+y-1]);
+        //                u++;
+        //            }
+        //        }
+        //        else
+        //        {
+        //            y++;
+        //        }
+        //    return FinalStationList;
+        //}
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="FreqienciesFoundList"></param>
+        /// <param name="ChannelsFoundList"></param>
+        /// <returns></returns>
+        /// 
+
+
+        //public List<double> CreateStations(double[] MeasurementResults, List<double> FrequenciesFound, double StartFrequency, double StopFrequency)
+        //{
+        //    List<double> MeasurementResultsList = MeasurementResults.ToList<double>();
+        //    List<double> StationChannelList = new List<double>();
+        //    List<double> StationsFound = new List<double>();
+        //    StationsFound.Add(87.5);
+        //    int x = 0;
+        //    var ChannelWidth = 2000000;
+
+        //    var NoOfChannels = (StopFrequency - StartFrequency) / (ChannelWidth);
+
+        //    foreach (double i in FrequenciesFound)
+        //    {
+        //        StationChannelList.Add(StationsFound[x] + ChannelWidth);
+        //        x++;
+        //    }
+
+        //    return x;
+
+    }
+
+}
 
 
