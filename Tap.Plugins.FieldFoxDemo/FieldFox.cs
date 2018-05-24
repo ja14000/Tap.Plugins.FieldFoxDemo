@@ -85,12 +85,30 @@ namespace Tap.Plugins.FieldFoxDemo
 
         public double[] GetData()
         {
-            ScpiCommand("SWE:POIN 401"); 
-            ScpiCommand("TRAC1:TYPE AVG"); 
+            ScpiCommand("SWE:POIN 401");
+            ScpiCommand("TRAC1:TYPE AVG");
             ScpiCommand("DISPlay:WINDow:TRACe:Y:SCALe:AUTO");
+            ScpiCommand("INITiate:CONTinuous 0");
+
             return ScpiQuery<double[]>("TRAC1:DATA?");
         }
-        
+
+
+        public List<double> RoundMeasurements(double[] MeasurementResults)
+        {
+            var RoundedMeasurementResultsList = MeasurementResults.ToList();
+            var x = 0;
+            foreach (double i in MeasurementResults)
+            {
+                RoundedMeasurementResultsList[x] = Math.Round(MeasurementResults[x], 2);
+                x++;
+            }
+
+            return RoundedMeasurementResultsList;
+
+        }
+
+
         //<summary>
         // This function generates a list of frequencies based on the start frequency, stop frequency and number of points that are
         // displayed on the FieldFox. These frequency values are used on the x-axis of the 'FM Spectrum View' plot and for later operations.

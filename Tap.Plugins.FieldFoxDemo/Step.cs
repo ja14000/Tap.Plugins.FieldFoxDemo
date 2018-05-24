@@ -76,6 +76,12 @@ namespace Tap.Plugins.FieldFoxDemo
             //Initial array of amplitudes collected by the fieldfox
             var MeasurementResults = FF.GetData();
 
+
+             //Round MeasurementResults from FieldFox
+            var RoundedMeasurementResultsList = FF.RoundMeasurements(MeasurementResults);
+            var RoundedMeasurementResultsArray = RoundedMeasurementResultsList.ToArray();
+
+
             // Initial array of frequencies evenly spaced between start and stop value
             var FrequencyList = FF.CalcFrequency(StartFrequency, StopFrequency);
             var FrequencyArray = FrequencyList.ToArray();
@@ -88,7 +94,7 @@ namespace Tap.Plugins.FieldFoxDemo
             var FrequenciesFoundList = FF.FrequenciesAboveCutoff(AmplitudeCutOff, MeasurementResults, FrequencyList);
             var FrequenciesFoundArray = FrequenciesFoundList.ToArray();
 
-            Results.PublishTable("FM Spectrum View", new List<string> { "Frequency(Hz)", "Amplitude(dBm)" }, FrequencyArray, MeasurementResults);
+            Results.PublishTable("FM Spectrum View", new List<string> { "Frequency(Hz)", "Amplitude(dBm)" }, FrequencyArray, RoundedMeasurementResultsArray);
             Results.PublishTable("Frequencies Above Cutoff", new List<string> { "Station Frequency(Hz)", "Station Amplitude(dBm)" }, FrequenciesFoundArray, AmplitudesAboveCutoffArray);
         }
 
