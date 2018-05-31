@@ -56,8 +56,8 @@ namespace Tap.Plugins.FieldFoxDemo
             //Set default values for properties / settings.
             StationFrequency = 104.1e6;
             CenterFrequency = StationFrequency;
-            StartFrequency = 88000000;
-            StopFrequency = 108000000;
+            StartFrequency = 30000;
+            StopFrequency = 18000000000;
             AmplitudeCutOff = -80;
         }
 
@@ -83,34 +83,41 @@ namespace Tap.Plugins.FieldFoxDemo
             var FrequencyList = FF.CalcFrequency(StartFrequency, StopFrequency);
             var FrequencyArray = FrequencyList.ToArray();
 
-            //Array of Amplitudes greater than the amplitue cutoff i.e. 'Stations'
-            var AmplitudesAboveCutoffArray = FF.AmplitudesAboveCutoff(AmplitudeCutOff, MeasurementResults);
-            var StationsFoundList = AmplitudesAboveCutoffArray.ToList();
+            ////Array of Amplitudes greater than the amplitue cutoff i.e. 'Stations'
+            //var AmplitudesAboveCutoffArray = FF.AmplitudesAboveCutoff(AmplitudeCutOff, MeasurementResults);
+            //var StationsFoundList = AmplitudesAboveCutoffArray.ToList();
 
-            // List of frquencies for each 'Station(Amplitude)' value
-            var FrequenciesFoundList = FF.FrequenciesAboveCutoff(AmplitudeCutOff, MeasurementResults, FrequencyList);
-            var FrequenciesFoundArray = FrequenciesFoundList.ToArray();
+            //// List of frquencies for each 'Station(Amplitude)' value
+            //var FrequenciesFoundList = FF.FrequenciesAboveCutoff(AmplitudeCutOff, MeasurementResults, FrequencyList);
+            //var FrequenciesFoundArray = FrequenciesFoundList.ToArray();
 
-            // Array of evenly spaced channels.
-            var ChannelsList = FF.CreateChannels();
-            var ChannelsListArray = ChannelsList.ToArray();
+            //// Array of evenly spaced channels.
+            //var ChannelsList = FF.CreateChannels();
+            //var ChannelsListArray = ChannelsList.ToArray();
 
-            // Array of station frequencies sorted into their corresponsing channels
-            var FrequenciesMappedToChannels = FF.MapFrequencyToChannel(FrequenciesFoundList, ChannelsList);
-            var FrequenciesMappedToChannelsArray = FrequenciesMappedToChannels.ToArray();
+            //// Array of station frequencies sorted into their corresponsing channels
+            //var FrequenciesMappedToChannels = FF.MapFrequencyToChannel(FrequenciesFoundList, ChannelsList);
+            //var FrequenciesMappedToChannelsArray = FrequenciesMappedToChannels.ToArray();
 
-            // Array of amplitudes corresponding to channels
-            var AmplitudesForChannelsList = FF.AmplitudesForChannels(StationsFoundList, FrequenciesMappedToChannels);
-            var AmplitudesForChannelsArray = AmplitudesForChannelsList.ToArray();
+            //// Array of amplitudes corresponding to channels
+            //var AmplitudesForChannelsList = FF.AmplitudesForChannels(StationsFoundList, FrequenciesMappedToChannels);
+            //var AmplitudesForChannelsArray = AmplitudesForChannelsList.ToArray();
 
-            // Array of frequencies for corresponding station amplitude
-            var FrequenciesForChannelsList = FF.FrequenciesForChannels(StationsFoundList, FrequenciesMappedToChannels);
-            var FrequenciesForChannelsArray = FrequenciesForChannelsList.ToArray();
+            //// Array of frequencies for corresponding station amplitude
+            //var FrequenciesForChannelsList = FF.FrequenciesForChannels(StationsFoundList, FrequenciesMappedToChannels);
+            //var FrequenciesForChannelsArray = FrequenciesForChannelsList.ToArray();
 
-            Results.PublishTable("FM Spectrum View", new List<string> { "Frequency(Hz)", "Amplitude(dBm)" }, FrequencyArray, RoundedMeasurementResultsArray);
-            Results.PublishTable("Frequencies Above Cutoff", new List<string> { "Station Frequency(Hz)", "Station Amplitude(dBm)" }, FrequenciesFoundArray, AmplitudesAboveCutoffArray);
-           // Results.PublishTable("FinalStationArray", new List<string> { "Frequency(Hz)", "Amplitude(dBm" }, FrequenciesForChannelsArray, AmplitudesForChannelsArray);
-            Results.PublishTable("FM Channels", new List<string> { "Frequency(Hz)", "Amplitude(dBm)" }, ChannelsListArray);
+            Results.PublishTable("NA Trace 1(S11)", new List<string> { "Frequency(Hz)", "Amplitude(dBm)" }, FrequencyArray, MeasurementResults);
+            Results.PublishTable("NA Trace 2", new List<string> { "Frequency(Hz)", "Amplitude(dBm)" }, FrequencyArray, MeasurementResults);
+            Results.PublishTable("NA Trace 3", new List<string> { "Frequency(Hz)", "Amplitude(dBm)" }, FrequencyArray, MeasurementResults);
+            Results.PublishTable("NA Trace 4(S22)", new List<string> { "Frequency(Hz)", "Amplitude(dBm)" }, FrequencyArray, MeasurementResults);
+            Results.PublishTable("NA Trace 5", new List<string> { "Frequency(Hz)", "Amplitude(dBm)" }, FrequencyArray, MeasurementResults);
+            Results.PublishTable("NA Trace 6", new List<string> { "Frequency(Hz)", "Amplitude(dBm)" }, FrequencyArray, MeasurementResults);
+            Results.PublishTable("NA Trace 7", new List<string> { "Frequency(Hz)", "Amplitude(dBm)" }, FrequencyArray, MeasurementResults);
+            Results.PublishTable("NA Trace 8", new List<string> { "Frequency(Hz)", "Amplitude(dBm)" }, FrequencyArray, MeasurementResults);
+            // Results.PublishTable("Frequencies Above Cutoff", new List<string> { "Station Frequency(Hz)", "Station Amplitude(dBm)" }, FrequenciesFoundArray, AmplitudesAboveCutoffArray);
+            //// Results.PublishTable("FinalStationArray", new List<string> { "Frequency(Hz)", "Amplitude(dBm" }, FrequenciesForChannelsArray, AmplitudesForChannelsArray);
+            // Results.PublishTable("FM Channels", new List<string> { "Frequency(Hz)", "Amplitude(dBm)" }, ChannelsListArray);
         }
 
         public override void PostPlanRun()

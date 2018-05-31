@@ -59,10 +59,10 @@ namespace Tap.Plugins.FieldFoxDemo
         //</summary>
         public void RadioMode(double StationFrequency)
         {
-            ScpiCommand(@"INSTrument:SELect ""SA"""); 
-            ScpiCommand("SENSe:MEASurement:TAListen FMW"); 
-            ScpiCommand(":SENSe:TAListen:TFReq " + StationFrequency); 
-            ScpiCommand(":SENSe:POWer:RF:GAIN:STATe 1"); 
+            ScpiCommand(@"INSTrument:SELect ""NA"""); 
+            //ScpiCommand("SENSe:MEASurement:TAListen FMW"); 
+            //ScpiCommand(":SENSe:TAListen:TFReq " + StationFrequency); 
+            //ScpiCommand(":SENSe:POWer:RF:GAIN:STATe 1"); 
         }
 
         //<summary>
@@ -70,7 +70,7 @@ namespace Tap.Plugins.FieldFoxDemo
         //<summary>
         public void SAView(double CenterFrequency)
         {
-            ScpiCommand(":SENSe:FREQuency:CENTer " + CenterFrequency); 
+            //ScpiCommand(":SENSe:FREQuency:CENTer " + CenterFrequency); 
         }
 
         //<summary>
@@ -79,18 +79,18 @@ namespace Tap.Plugins.FieldFoxDemo
         //<summary>
         public void ScanStations(double StartFrequency, double StopFrequency)
         {
-            ScpiCommand(":SENS:FREQ:STAR " + StartFrequency); 
-            ScpiCommand(":SENS:FREQ:STOP " + StopFrequency); 
+            //ScpiCommand(":SENS:FREQ:STAR " + StartFrequency); 
+            //ScpiCommand(":SENS:FREQ:STOP " + StopFrequency); 
         }
 
         public double[] GetData()
         {
-            ScpiCommand("SWE:POIN 401"); 
-            ScpiCommand("TRAC1:TYPE AVG"); 
-            ScpiCommand("DISPlay:WINDow:TRACe:Y:SCALe:AUTO");
-            ScpiCommand("INITiate:CONTinuous 0");
+            //ScpiCommand("SWE:POIN 401"); 
+            //ScpiCommand("TRAC1:TYPE AVG"); 
+            //ScpiCommand("DISPlay:WINDow:TRACe:Y:SCALe:AUTO");
+            //ScpiCommand("INITiate:CONTinuous 0");
             
-            return ScpiQuery<double[]>("TRAC1:DATA?");
+            return ScpiQuery<double[]>("CALCulate:DATA:FDATa?");
         }
         
 
@@ -114,11 +114,11 @@ namespace Tap.Plugins.FieldFoxDemo
         //</summary>
         public List<double> CalcFrequency(double StartFrequency, double StopFrequency)
         {
-            var FrequencyStep = ((StopFrequency - StartFrequency) / (400));
+            var FrequencyStep = ((StopFrequency - StartFrequency) / (200));
             List<double> FrequencyList = new List<double>();
             FrequencyList.Add(StartFrequency);
 
-            for (int runs = 0; runs < 400; runs++)
+            for (int runs = 0; runs < 200; runs++)
             {
                 FrequencyList.Add(FrequencyList[runs] + FrequencyStep);
             }
