@@ -48,7 +48,7 @@ namespace Tap.Plugins.FieldFoxDemo
 
         [Display("Include GPS Data?", Group: "DUT Setup", Order: 6)]
         
-        public bool IncludeGps { get; set; }
+        public bool IncludeGPS { get; set; }
 
         // Instrument Declarations (Creates dropdown in TAP GUI))
         [Display("FieldFox", Group: "DUT", Order: 1)]
@@ -110,7 +110,11 @@ namespace Tap.Plugins.FieldFoxDemo
 
             Results.PublishTable("FM Spectrum View", new List<string> { "Frequency(Hz)", "Amplitude(dBm)" }, FrequencyArray, RoundedMeasurementResultsArray);
             Results.PublishTable("Frequencies Above Cutoff", new List<string> { "Station Frequency(Hz)", "Station Amplitude(dBm)" }, FrequenciesFoundArray, AmplitudesAboveCutoffArray);
-            Results.PublishTable("GPS DATA", new List<string> { "GPS Coordinates"},  GPSARRAY); //still not working check page 29 of developer guide
+
+            if (IncludeGPS == true)
+            {
+                Results.PublishTable("GPS DATA", new List<string> { "GPS Coordinates", }, GPSARRAY); //still not working check page 29 of developer guide
+            }
         }
 
 
