@@ -83,16 +83,31 @@ namespace Tap.Plugins.FieldFoxDemo
             ScpiCommand(":SENS:FREQ:STOP " + StopFrequency); 
         }
 
-        public double[] GetData()
+        public double[] GetData(bool FreezeFF)
         {
             ScpiCommand("SWE:POIN 401");
             ScpiCommand("TRAC1:TYPE AVG");
             ScpiCommand("DISPlay:WINDow:TRACe:Y:SCALe:AUTO");
-            ScpiCommand("INITiate:CONTinuous 0");
+
+            if (FreezeFF == true)
+            {
+                ScpiCommand("INITiate:CONTinuous 0" );
+            }
+            else
+            {
+                ScpiCommand("INITiate:CONTinuous 1");
+            }
 
             return ScpiQuery<double[]>("TRAC1:DATA?");
         }
 
+        public string GetGPS()
+        {
+           
+            var storage = ScpiQuery("SYSTem:GPS:DATA?");
+            
+            return storage;
+        }
 
         public List<double> RoundMeasurements(double[] MeasurementResults)
         {
@@ -159,6 +174,8 @@ namespace Tap.Plugins.FieldFoxDemo
             }
             return FrequenciesAboveCutoff; 
         }
+
+        
 
   
     }   

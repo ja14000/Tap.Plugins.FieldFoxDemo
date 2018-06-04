@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.ComponentModel;
-
 using Keysight.Tap;  // Use Platform infrastructure/core components (log,TestStep definition, etc)
 
 namespace Tap.Plugins.FieldFoxDemo
@@ -43,9 +42,19 @@ namespace Tap.Plugins.FieldFoxDemo
         [Unit("dBm", UseEngineeringPrefix: true)]
         public int AmplitudeCutOff { get; set; }
 
+        [Display("Freeze Fieldfox Display?", Group: "DUT Setup", Order: 7)]
+        
+        public bool FreezeFF { get; set; }
+
+        [Display("Include GPS Data?", Group: "DUT Setup", Order: 6)]
+        
+        public bool IncludeGps { get; set; }
+
         // Instrument Declarations (Creates dropdown in TAP GUI))
         [Display("FieldFox", Group: "DUT", Order: 1)]
         public FieldFox FF { get; set; }
+
+        
 
 
         #endregion
@@ -74,7 +83,7 @@ namespace Tap.Plugins.FieldFoxDemo
             FF.ScanStations(StartFrequency, StopFrequency);
 
             //Initial array of amplitudes collected by the fieldfox
-            var MeasurementResults = FF.GetData();
+            var MeasurementResults = FF.GetData(FreezeFF);
 
 
              //Round MeasurementResults from FieldFox
@@ -94,9 +103,17 @@ namespace Tap.Plugins.FieldFoxDemo
             var FrequenciesFoundList = FF.FrequenciesAboveCutoff(AmplitudeCutOff, MeasurementResults, FrequencyList);
             var FrequenciesFoundArray = FrequenciesFoundList.ToArray();
 
+            string GPSDATA = FF.GetGPS();
+            string[] GPSARRAY = new string[] { GPSDATA };
+            //var gpslist = GPSDATA.ToCharArray();
+            
+
             Results.PublishTable("FM Spectrum View", new List<string> { "Frequency(Hz)", "Amplitude(dBm)" }, FrequencyArray, RoundedMeasurementResultsArray);
             Results.PublishTable("Frequencies Above Cutoff", new List<string> { "Station Frequency(Hz)", "Station Amplitude(dBm)" }, FrequenciesFoundArray, AmplitudesAboveCutoffArray);
+            Results.PublishTable("GPS DATA", new List<string> { "GPS Coordinates"},  GPSARRAY); //still not working check page 29 of developer guide
         }
+
+
 
         public override void PostPlanRun()
         {
