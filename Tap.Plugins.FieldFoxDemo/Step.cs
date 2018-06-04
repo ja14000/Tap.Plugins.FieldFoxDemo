@@ -42,20 +42,21 @@ namespace Tap.Plugins.FieldFoxDemo
         [Unit("dBm", UseEngineeringPrefix: true)]
         public int AmplitudeCutOff { get; set; }
 
-        [Display("Freeze Fieldfox Display?", Group: "DUT Setup", Order: 7)]
-        
+        [Display("Freeze Fieldfox Display?", Group: "Other Settings", Order: 3)]
         public bool FreezeFF { get; set; }
 
-        [Display("Include GPS Data?", Group: "DUT Setup", Order: 6)]
-        
+        [Display("Include GPS Data?", Group: "Other Settings", Order: 2)]
         public bool IncludeGPS { get; set; }
+
+        [Display("Play Radio Station on Speakers?", Group: "Other Settings", Order: 4)]
+        public bool PlayYesNo { get; set; }
+
+        [Display("Preset Instrument?", Group: "Other Settings", Order: 1)]
+        public bool PresetYesNo { get; set; }
 
         // Instrument Declarations (Creates dropdown in TAP GUI))
         [Display("FieldFox", Group: "DUT", Order: 1)]
         public FieldFox FF { get; set; }
-
-        
-
 
         #endregion
 
@@ -68,6 +69,7 @@ namespace Tap.Plugins.FieldFoxDemo
             StartFrequency = 88000000;
             StopFrequency = 108000000;
             AmplitudeCutOff = -80;
+            PresetYesNo = false;
         }
 
         public override void PrePlanRun()
@@ -78,7 +80,8 @@ namespace Tap.Plugins.FieldFoxDemo
 
         public override void Run()
         {
-            FF.RadioMode(StationFrequency);
+            FF.Preset(PresetYesNo);
+            FF.RadioMode(StationFrequency, PlayYesNo);
             FF.SAView(CenterFrequency);
             FF.ScanStations(StartFrequency, StopFrequency);
 
@@ -113,7 +116,7 @@ namespace Tap.Plugins.FieldFoxDemo
 
             if (IncludeGPS == true)
             {
-                Results.PublishTable("GPS DATA", new List<string> { "GPS Coordinates", }, GPSARRAY); //still not working check page 29 of developer guide
+                Results.PublishTable("GPS DATA", new List<string> { "GPS Coordinates", }, GPSARRAY);
             }
         }
 

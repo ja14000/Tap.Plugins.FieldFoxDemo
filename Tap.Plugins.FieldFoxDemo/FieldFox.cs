@@ -33,6 +33,7 @@ namespace Tap.Plugins.FieldFoxDemo
         public FieldFox()
         {
             //ScpiCommand("SYSTem:PRESet");
+           // ScpiQuery("*OPC?");
         }
 
         public override void Open()
@@ -57,12 +58,37 @@ namespace Tap.Plugins.FieldFoxDemo
         //Tune to radio station
         //Turn On the Pre-Amp
         //</summary>
-        public void RadioMode(double StationFrequency)
+
+       public void Preset(bool PresetYesNo)
+        {
+            if(PresetYesNo == true)
+            {
+                ScpiCommand("SYSTem:PRESet");
+                ScpiQuery("*OPC?");
+            }
+
+           
+        }
+
+        public void RadioMode(double StationFrequency, bool PlayYesNo)
         {
             ScpiCommand(@"INSTrument:SELect ""SA"""); 
-            ScpiCommand("SENSe:MEASurement:TAListen FMW"); 
-            ScpiCommand(":SENSe:TAListen:TFReq " + StationFrequency); 
-            ScpiCommand(":SENSe:POWer:RF:GAIN:STATe 1"); 
+
+            if(PlayYesNo == true)
+            {
+                ScpiCommand("TAL:DST 1");
+                ScpiCommand("SENSe:MEASurement:TAListen FMW");
+                ScpiCommand(":SENSe:TAListen:TFReq " + StationFrequency);
+                
+            }
+
+            if (PlayYesNo == false)
+            {
+                
+                ScpiCommand("TAL:DST 0");
+            }
+
+            ScpiCommand(":SENSe:POWer:RF:GAIN:STATe 1");
         }
 
         //<summary>
