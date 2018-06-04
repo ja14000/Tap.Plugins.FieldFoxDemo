@@ -52,24 +52,28 @@ namespace Tap.Plugins.FieldFoxDemo
             base.Close();
         }
 
+
         //<summary>
         //Select the Spectrum Analyzer Instrument
         //Activate FM Wide listening mode
         //Tune to radio station
         //Turn On the Pre-Amp
         //</summary>
-
-       public void Preset(bool PresetYesNo)
+        public void Preset(bool PresetYesNo)
         {
             if(PresetYesNo == true)
             {
                 ScpiCommand("SYSTem:PRESet");
                 ScpiQuery("*OPC?");
             }
-
-           
         }
 
+        //<summary>
+        //Select the Spectrum Analyzer Instrument
+        //Activate FM Wide listening mode if user has selected
+        //Tune to radio station if user has selected
+        //Turn On the Pre-Amp
+        //</summary>
         public void RadioMode(double StationFrequency, bool PlayYesNo)
         {
             ScpiCommand(@"INSTrument:SELect ""SA"""); 
