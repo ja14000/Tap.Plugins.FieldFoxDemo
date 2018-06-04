@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.ComponentModel;
-using Keysight.Tap;  // Use Platform infrastructure/core components (log,TestStep definition, etc)
+using Keysight.Tap; 
 
 namespace Tap.Plugins.FieldFoxDemo
 {
@@ -18,7 +18,7 @@ namespace Tap.Plugins.FieldFoxDemo
     public class Step : TestStep
     {
         #region Settings
-        // ToDo: Add property here for each parameter the end user should be able to change.
+        
 
 
         //Creates a UI dropdown for the variable
@@ -77,7 +77,6 @@ namespace Tap.Plugins.FieldFoxDemo
             base.PrePlanRun();
         }
 
-
         public override void Run()
         {
             FF.Preset(PresetYesNo);
@@ -88,11 +87,9 @@ namespace Tap.Plugins.FieldFoxDemo
             //Initial array of amplitudes collected by the fieldfox
             var MeasurementResults = FF.GetData(FreezeFF);
 
-
-             //Round MeasurementResults from FieldFox
+            //Round MeasurementResults from FieldFox
             var RoundedMeasurementResultsList = FF.RoundMeasurements(MeasurementResults);
             var RoundedMeasurementResultsArray = RoundedMeasurementResultsList.ToArray();
-
 
             // Initial array of frequencies evenly spaced between start and stop value
             var FrequencyList = FF.CalcFrequency(StartFrequency, StopFrequency);
@@ -108,9 +105,8 @@ namespace Tap.Plugins.FieldFoxDemo
 
             string GPSDATA = FF.GetGPS();
             string[] GPSARRAY = new string[] { GPSDATA };
-            //var gpslist = GPSDATA.ToCharArray();
             
-
+            
             Results.PublishTable("FM Spectrum View", new List<string> { "Frequency(Hz)", "Amplitude(dBm)" }, FrequencyArray, RoundedMeasurementResultsArray);
             Results.PublishTable("Frequencies Above Cutoff", new List<string> { "Station Frequency(Hz)", "Station Amplitude(dBm)" }, FrequenciesFoundArray, AmplitudesAboveCutoffArray);
 
@@ -119,7 +115,6 @@ namespace Tap.Plugins.FieldFoxDemo
                 Results.PublishTable("GPS DATA", new List<string> { "GPS Coordinates", }, GPSARRAY);
             }
         }
-
 
 
         public override void PostPlanRun()
