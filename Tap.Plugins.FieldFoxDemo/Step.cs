@@ -18,8 +18,6 @@ namespace Tap.Plugins.FieldFoxDemo
     public class Step : TestStep
     {
         #region Settings
-        
-
 
         //Creates a UI dropdown for the variable
         [Display("Station Frequency", Group: "DUT Setup", Order: 1)]
@@ -83,8 +81,6 @@ namespace Tap.Plugins.FieldFoxDemo
         public void SetVerdict()
         {
             MyVerdict = Verdict.NotSet;
-
-
         }
 
         public override void Run()
@@ -123,7 +119,6 @@ namespace Tap.Plugins.FieldFoxDemo
             if(FrequencyArray[1] > 0 && RoundedMeasurementResultsArray[1] < 0 && FrequenciesFoundArray[1] > 0 && AmplitudesAboveCutoffArray[1] < 0 )
             {
                 UpgradeVerdict(Verdict.Pass);
-
             }
 
             else
