@@ -58,6 +58,9 @@ namespace Tap.Plugins.FieldFoxDemo
         [Display("FieldFox", Group: "DUT", Order: 1)]
         public FieldFox FF { get; set; }
 
+        public Verdict MyVerdict { get; set; }
+        public double LowerLimit { get; set; }
+
         #endregion
 
 
@@ -75,6 +78,13 @@ namespace Tap.Plugins.FieldFoxDemo
         public override void PrePlanRun()
         {
             base.PrePlanRun();
+        }
+
+        public void SetVerdict()
+        {
+            MyVerdict = Verdict.NotSet;
+
+
         }
 
         public override void Run()
@@ -107,13 +117,25 @@ namespace Tap.Plugins.FieldFoxDemo
             string[] GPSARRAY = new string[] { GPSDATA };
             
             
-            Results.PublishTable("GPS Coordinates " + GPSDATA, new List<string> { "Frequency(Hz)", "Amplitude(dBm)" }, FrequencyArray, RoundedMeasurementResultsArray);
+            Results.PublishTable("Scan @ Coordinates:" + GPSDATA, new List<string> { "Frequency(Hz)", "Amplitude(dBm)" }, FrequencyArray, RoundedMeasurementResultsArray);
             Results.PublishTable("Frequencies Above Cutoff", new List<string> { "Station Frequency(Hz)", "Station Amplitude(dBm)" }, FrequenciesFoundArray, AmplitudesAboveCutoffArray);
 
-            if (IncludeGPS == true)
+            if(FrequencyArray[1] > 0 && RoundedMeasurementResultsArray[1] < 0 && FrequenciesFoundArray[1] > 0 && AmplitudesAboveCutoffArray[1] < 0 )
             {
-                Results.PublishTable("GPS DATA", new List<string> { "GPS Coordinates", }, GPSARRAY);
+                UpgradeVerdict(Verdict.Pass);
+
             }
+
+            else
+            {
+                UpgradeVerdict(Verdict.Fail);
+            }
+            
+
+            //if (IncludeGPS == true)
+            //{
+            //    Results.PublishTable("Scan @ Coordinates: ", new List<string> { "GPS Coordinates", }, GPSARRAY);
+            //}
         }
 
 
