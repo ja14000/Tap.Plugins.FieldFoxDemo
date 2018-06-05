@@ -118,12 +118,12 @@ namespace Tap.Plugins.FieldFoxDemo
 
             //String containing GPS Data
             string GPSDATA = FF.GetGPS();
-            string[] GPSARRAY = new string[] { GPSDATA };
+            // string[] GPSARRAY = new string[] { GPSDATA }; -- This is used for plotting the gps data as a data table rather than using them in the table heading.
 
-
+            
             if (IncludeGPS == true)
             {
-                Results.PublishTable("Location/Date/Time: " + GPSDATA, new List<string> { "Frequency(Hz)", "Amplitude(dBm)" }, FrequencyArray, RoundedMeasurementResultsArray);
+                Results.PublishTable("Location/Date/Time of Scan: " + GPSDATA, new List<string> { "Frequency(Hz)", "Amplitude(dBm)" }, FrequencyArray, RoundedMeasurementResultsArray);
             }
             else
             {
