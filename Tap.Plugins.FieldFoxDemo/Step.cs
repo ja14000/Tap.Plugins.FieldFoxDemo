@@ -107,7 +107,7 @@ namespace Tap.Plugins.FieldFoxDemo
             string[] GPSARRAY = new string[] { GPSDATA };
             
             
-            Results.PublishTable("FM Spectrum View", new List<string> { "Frequency(Hz)", "Amplitude(dBm)" }, FrequencyArray, RoundedMeasurementResultsArray);
+            Results.PublishTable("GPS Coordinates " + GPSDATA, new List<string> { "Frequency(Hz)", "Amplitude(dBm)" }, FrequencyArray, RoundedMeasurementResultsArray);
             Results.PublishTable("Frequencies Above Cutoff", new List<string> { "Station Frequency(Hz)", "Station Amplitude(dBm)" }, FrequenciesFoundArray, AmplitudesAboveCutoffArray);
 
             if (IncludeGPS == true)
