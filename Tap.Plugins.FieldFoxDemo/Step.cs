@@ -40,27 +40,30 @@ namespace Tap.Plugins.FieldFoxDemo
         [Unit("dBm", UseEngineeringPrefix: true)]
         public int AmplitudeCutOff { get; set; }
 
-        [Display("Freeze Fieldfox Display?", Group: "Other Settings", Order: 3)]
+        [Display("Freeze Fieldfox Display", Group: "Other Settings", Order: 3)]
         public bool FreezeFF { get; set; }
 
-        [Display("Include GPS Data?", Group: "Other Settings", Order: 2)]
+        [Display("Include GPS Data", Group: "Other Settings", Order: 2)]
         public bool IncludeGPS { get; set; }
 
-        [Display("Play Radio Station on Speakers?", Group: "Other Settings", Order: 4)]
+        [Display("Play Radio Station on Speakers", Group: "Other Settings", Order: 4)]
         public bool PlayYesNo { get; set; }
 
-        [Display("Preset Instrument?", Group: "Other Settings", Order: 1)]
+        [Display("Preset Instrument", Group: "Other Settings", Order: 1)]
         public bool PresetYesNo { get; set; }
+
+        [Display("Enable Step Verdict", Group: "Other Settings", Order: 5)]
+        public bool EnableTestVerdict { get; set; }
+        public Verdict MyVerdict;
+
 
         // Instrument Declarations (Creates dropdown in TAP GUI))
         [Display("FieldFox", Group: "DUT", Order: 1)]
         public FieldFox FF { get; set; }
 
-        public Verdict MyVerdict { get; set; }
-        public double LowerLimit { get; set; }
 
+       
         #endregion
-
 
         public Step()
         {
@@ -71,6 +74,10 @@ namespace Tap.Plugins.FieldFoxDemo
             StopFrequency = 108000000;
             AmplitudeCutOff = -80;
             PresetYesNo = false;
+            IncludeGPS = true;
+            FreezeFF = true;
+            PlayYesNo = false;
+            EnableTestVerdict = true;
         }
 
         public override void PrePlanRun()
@@ -109,23 +116,36 @@ namespace Tap.Plugins.FieldFoxDemo
             var FrequenciesFoundList = FF.FrequenciesAboveCutoff(AmplitudeCutOff, MeasurementResults, FrequencyList);
             var FrequenciesFoundArray = FrequenciesFoundList.ToArray();
 
+            //String containing GPS Data
             string GPSDATA = FF.GetGPS();
             string[] GPSARRAY = new string[] { GPSDATA };
-            
-            
-            Results.PublishTable("Scan @ Coordinates:" + GPSDATA, new List<string> { "Frequency(Hz)", "Amplitude(dBm)" }, FrequencyArray, RoundedMeasurementResultsArray);
-            Results.PublishTable("Frequencies Above Cutoff", new List<string> { "Station Frequency(Hz)", "Station Amplitude(dBm)" }, FrequenciesFoundArray, AmplitudesAboveCutoffArray);
 
-            if(FrequencyArray[1] > 0 && RoundedMeasurementResultsArray[1] < 0 && FrequenciesFoundArray[1] > 0 && AmplitudesAboveCutoffArray[1] < 0 )
+
+            if (IncludeGPS == true)
             {
-                UpgradeVerdict(Verdict.Pass);
+                Results.PublishTable("Location/Date/Time: " + GPSDATA, new List<string> { "Frequency(Hz)", "Amplitude(dBm)" }, FrequencyArray, RoundedMeasurementResultsArray);
             }
-
             else
             {
-                UpgradeVerdict(Verdict.Fail);
+                Results.PublishTable("Channels Frequencies", new List<string> { "Frequency(Hz)", "Amplitude(dBm)" }, FrequencyArray, RoundedMeasurementResultsArray);
             }
-            
+
+            Results.PublishTable("Frequencies Above Cutoff", new List<string> { "Station Frequency(Hz)", "Station Amplitude(dBm)" }, FrequenciesFoundArray, AmplitudesAboveCutoffArray);
+
+
+            if (EnableTestVerdict == true)
+            {
+                if (FrequencyArray[1] > 0 && RoundedMeasurementResultsArray[1] < 0 && FrequenciesFoundArray[1] > 0 && AmplitudesAboveCutoffArray[1] < 0)
+                {
+                    UpgradeVerdict(Verdict.Pass);
+                }
+
+                else
+                {
+                    UpgradeVerdict(Verdict.Fail);
+                }
+
+            }
 
             //if (IncludeGPS == true)
             //{

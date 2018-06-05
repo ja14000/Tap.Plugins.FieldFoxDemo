@@ -135,8 +135,8 @@ namespace Tap.Plugins.FieldFoxDemo
         {
            
             var storage = ScpiQuery("SYSTem:GPS:DATA?");
-            
-            return storage;
+            storage = storage.Replace("\"", "");
+            return storage; 
         }
 
         public List<double> RoundMeasurements(double[] MeasurementResults)
