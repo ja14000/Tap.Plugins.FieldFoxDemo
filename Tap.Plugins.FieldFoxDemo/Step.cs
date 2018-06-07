@@ -145,19 +145,6 @@ namespace Tap.Plugins.FieldFoxDemo
             Results.PublishTable("Frequencies Above Cutoff", new List<string> { "Station Frequency(Hz)", "Station Amplitude(dBm)" }, FrequenciesFoundArray, AmplitudesAboveCutoffArray);
 
 
-            //<summary>
-            // if ((EnableTestVerdict == true && AmplitudesAboveCutoffArray.Length != 0))
-            // {
-            //     if (FrequencyArray[0] > 0 && RoundedMeasurementResultsArray[0] < 0 && FrequenciesFoundArray[0] > 0 && AmplitudesAboveCutoffArray[0] < 0)
-            //     {
-            //         UpgradeVerdict(Verdict.Pass);
-            //     }
-            // }
-            //if (AmplitudesAboveCutoffArray.Length == 0)
-            //     {
-            //       UpgradeVerdict(Verdict.Fail);
-            //     }
-            //</summary>
 
             if (CheckFreq == true)
             {
