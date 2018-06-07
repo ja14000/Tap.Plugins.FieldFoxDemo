@@ -64,6 +64,7 @@ namespace Tap.Plugins.FieldFoxDemo
             if(PresetYesNo == true)
             {
                 ScpiCommand("SYSTem:PRESet");
+                ScpiCommand("*OPC");
                 ScpiQuery("*OPC?");
             }
         }
@@ -100,7 +101,8 @@ namespace Tap.Plugins.FieldFoxDemo
         //<summary>
         public void SAView(double CenterFrequency)
         {
-            ScpiCommand(":SENSe:FREQuency:CENTer " + CenterFrequency); 
+            ScpiCommand(":SENSe:FREQuency:CENTer " + CenterFrequency);
+            ScpiCommand("DISPlay:WINDow:TRACe:Y:SCALe:AUTO");
         }
 
         //<summary>
@@ -118,6 +120,8 @@ namespace Tap.Plugins.FieldFoxDemo
             ScpiCommand("SWE:POIN 401");
             ScpiCommand("TRAC1:TYPE AVG");
             ScpiCommand("DISPlay:WINDow:TRACe:Y:SCALe:AUTO");
+            ScpiCommand("*OPC");
+            ScpiQuery("*OPC?");
 
             if (FreezeFF == true)
             {
@@ -128,12 +132,15 @@ namespace Tap.Plugins.FieldFoxDemo
                 ScpiCommand("INITiate:CONTinuous 1");
             }
 
-            return ScpiQuery<double[]>("TRAC1:DATA?");
+            var data = ScpiQuery<double[]>("TRAC1:DATA?");
+            ScpiQuery("*OPC?");
+
+            return data;
         }
 
         public string GetGPS()
         {
-           
+            
             var storage = ScpiQuery("SYSTem:GPS:DATA?");
             storage = storage.Replace("\"", "");
             return storage; 

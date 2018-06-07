@@ -13,16 +13,17 @@ using Keysight.Tap;
 
 namespace Tap.Plugins.FieldFoxDemo
 {
-    [Display("FF Demo", Group: "FieldFoxDemo", Description: "Tune in to a radio station, capture data, plot graphs")]
+    [Display("FF Demo", Groups: new[] { "FieldFoxDemo"}, Description: "Tune in to a radio station, capture data, plot graphs")]
 
     public class Step : TestStep
     {
         #region Settings
 
-        //Creates a UI dropdown for the variable
-        [Display("Station Frequency", Group: "DUT Setup", Order: 1)]
+        //Variables
+
+        [Display("Playback Station Frequency", Group: "DUT Setup", Order: 5)]
         [Unit("Hz", UseEngineeringPrefix: true)]
-        public double StationFrequency { get; set; }
+        public Enabled <double> StationFrequency { get; set; }
 
         [Display("Center Frequency", Group: "DUT Setup", Order: 2)]
         [Unit("Hz", UseEngineeringPrefix: true)]
@@ -36,18 +37,17 @@ namespace Tap.Plugins.FieldFoxDemo
         [Unit("Hz", UseEngineeringPrefix: true)]
         public double StopFrequency { get; set; }
 
-        [Display("Amplitude Cut Off", Group: "DUT Setup", Order: 5)]
+        [Display("Amplitude Cut Off", Group: "DUT Setup", Order: 1)]
         [Unit("dBm", UseEngineeringPrefix: true)]
         public int AmplitudeCutOff { get; set; }
+
+        //Toggles
 
         [Display("Freeze Fieldfox Display", Group: "Other Settings", Order: 3)]
         public bool FreezeFF { get; set; }
 
         [Display("Include GPS Data", Group: "Other Settings", Order: 2)]
         public bool IncludeGPS { get; set; }
-
-        [Display("Play Radio Station on Speakers", Group: "Other Settings", Order: 4)]
-        public bool PlayYesNo { get; set; }
 
         [Display("Preset Instrument", Group: "Other Settings", Order: 1)]
         public bool PresetYesNo { get; set; }
@@ -56,28 +56,32 @@ namespace Tap.Plugins.FieldFoxDemo
         public bool EnableTestVerdict { get; set; }
         public Verdict MyVerdict;
 
+        //Instrument Declarations
 
-        // Instrument Declarations (Creates dropdown in TAP GUI))
         [Display("FieldFox", Group: "DUT", Order: 1)]
         public FieldFox FF { get; set; }
 
-
-       
         #endregion
 
         public Step()
         {
-            //Set default values for properties / settings.
-            StationFrequency = 104.1e6;
-            CenterFrequency = StationFrequency;
+            // Default Settings
+
+            StationFrequency = new Enabled<double>() { IsEnabled = true, Value = 97000000}; ;
+            CenterFrequency = StationFrequency.Value;
             StartFrequency = 88000000;
             StopFrequency = 108000000;
             AmplitudeCutOff = -80;
             PresetYesNo = false;
             IncludeGPS = true;
-            FreezeFF = true;
-            PlayYesNo = false;
+            FreezeFF = false;
             EnableTestVerdict = true;
+
+            //Rules
+
+            Rules.Add(() => (FreezeFF && StationFrequency.IsEnabled) != true, "Freezing the display disables speaker playback", "StationFrequency", "FreezeFF");
+            Rules.Add(() => StartFrequency >= 88e6 && StartFrequency <= 108e6, "Start frequency must be greater than 88mhz and less than 108mhz", "StartFrequency");
+            Rules.Add(() => (StopFrequency > StartFrequency && StopFrequency <= 108e6), "Stop frequency must be greater than the Start Frequency and less than 108mhz", "StopFrequency");
         }
 
         public override void PrePlanRun()
@@ -92,14 +96,19 @@ namespace Tap.Plugins.FieldFoxDemo
 
         public override void Run()
         {
+
+            //Pass user defined variables to their respective functions
             FF.Preset(PresetYesNo);
-            FF.RadioMode(StationFrequency, PlayYesNo);
+            FF.RadioMode(StationFrequency.Value, StationFrequency.IsEnabled);
             FF.SAView(CenterFrequency);
             FF.ScanStations(StartFrequency, StopFrequency);
 
+            // Gather GPS Data For Scan
+            string GPSDATA = FF.GetGPS();
+
             //Initial array of amplitudes collected by the fieldfox
             var MeasurementResults = FF.GetData(FreezeFF);
-
+            
             //Round MeasurementResults from FieldFox
             var RoundedMeasurementResultsList = FF.RoundMeasurements(MeasurementResults);
             var RoundedMeasurementResultsArray = RoundedMeasurementResultsList.ToArray();
@@ -116,10 +125,6 @@ namespace Tap.Plugins.FieldFoxDemo
             var FrequenciesFoundList = FF.FrequenciesAboveCutoff(AmplitudeCutOff, MeasurementResults, FrequencyList);
             var FrequenciesFoundArray = FrequenciesFoundList.ToArray();
 
-            //String containing GPS Data
-            string GPSDATA = FF.GetGPS();
-            // string[] GPSARRAY = new string[] { GPSDATA }; -- This is used for plotting the gps data as a data table rather than using them in the table heading.
-
             
             if (IncludeGPS == true)
             {
@@ -133,24 +138,20 @@ namespace Tap.Plugins.FieldFoxDemo
             Results.PublishTable("Frequencies Above Cutoff", new List<string> { "Station Frequency(Hz)", "Station Amplitude(dBm)" }, FrequenciesFoundArray, AmplitudesAboveCutoffArray);
 
 
-            if (EnableTestVerdict == true)
+            if ((EnableTestVerdict == true && AmplitudesAboveCutoffArray.Length != 0))
             {
-                if (FrequencyArray[1] > 0 && RoundedMeasurementResultsArray[1] < 0 && FrequenciesFoundArray[1] > 0 && AmplitudesAboveCutoffArray[1] < 0)
+                if (FrequencyArray[0] > 0 && RoundedMeasurementResultsArray[0] < 0 && FrequenciesFoundArray[0] > 0 && AmplitudesAboveCutoffArray[0] < 0)
                 {
                     UpgradeVerdict(Verdict.Pass);
                 }
-
-                else
-                {
-                    UpgradeVerdict(Verdict.Fail);
-                }
-
             }
 
-            //if (IncludeGPS == true)
-            //{
-            //    Results.PublishTable("Scan @ Coordinates: ", new List<string> { "GPS Coordinates", }, GPSARRAY);
-            //}
+           if (AmplitudesAboveCutoffArray.Length == 0)
+
+                {
+                  UpgradeVerdict(Verdict.Fail);
+                }
+
         }
 
 
