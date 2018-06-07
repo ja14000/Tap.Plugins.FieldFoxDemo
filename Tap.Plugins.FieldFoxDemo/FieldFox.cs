@@ -117,7 +117,7 @@ namespace Tap.Plugins.FieldFoxDemo
 
         public double[] GetData(bool FreezeFF)
         {
-            ScpiCommand("SWE:POIN 401");
+            ScpiCommand("SWE:POIN 400");
             ScpiCommand("TRAC1:TYPE AVG");
             ScpiCommand("DISPlay:WINDow:TRACe:Y:SCALe:AUTO");
             ScpiCommand("*OPC");
@@ -167,11 +167,11 @@ namespace Tap.Plugins.FieldFoxDemo
         //</summary>
         public List<double> CalcFrequency(double StartFrequency, double StopFrequency)
         {
-            var FrequencyStep = ((StopFrequency - StartFrequency) / (401));
+            var FrequencyStep = ((StopFrequency - StartFrequency) / (400));
             List<double> FrequencyList = new List<double>();
             FrequencyList.Add(StartFrequency);
 
-            for (int runs = 0; runs < 400; runs++)
+            for (int runs = 0; runs < 399; runs++)
             {
                 FrequencyList.Add(FrequencyList[runs] + FrequencyStep);
             }
@@ -212,7 +212,26 @@ namespace Tap.Plugins.FieldFoxDemo
             return FrequenciesAboveCutoff; 
         }
 
-        
+        public bool? CheckFreq(List<double> FrequenciesFoundList, double MatchFrequency)
+        {
+            bool? MatchFound = null;
+
+            foreach (double i in FrequenciesFoundList)
+            {
+                
+                if (FrequenciesFoundList.Contains(MatchFrequency))
+                {
+                    MatchFound = true;
+                    break;
+                }
+                else
+                {
+                    MatchFound = false;
+                }
+
+            }
+            return MatchFound;
+        }
 
   
     }   

@@ -21,15 +21,15 @@ namespace Tap.Plugins.FieldFoxDemo
 
         //Variables
 
-        [Display("Playback Station Frequency", Group: "DUT Setup", Order: 5)]
+        [Display("Playback Station Frequency", Group: "DUT Setup", Order: 2)]
         [Unit("Hz", UseEngineeringPrefix: true)]
         public Enabled <double> StationFrequency { get; set; }
 
-        [Display("Center Frequency", Group: "DUT Setup", Order: 2)]
+        [Display("Center Frequency", Group: "DUT Setup", Order: 3)]
         [Unit("Hz", UseEngineeringPrefix: true)]
         public double CenterFrequency { get; set; }
 
-        [Display("Start Frequency", Group: "DUT Setup", Order: 3)]
+        [Display("Start Frequency", Group: "DUT Setup", Order: 5)]
         [Unit("Hz", UseEngineeringPrefix: true)]
         public double StartFrequency { get; set; }
 
@@ -37,9 +37,13 @@ namespace Tap.Plugins.FieldFoxDemo
         [Unit("Hz", UseEngineeringPrefix: true)]
         public double StopFrequency { get; set; }
 
-        [Display("Amplitude Cut Off", Group: "DUT Setup", Order: 1)]
+        [Display("Amplitude Cut Off", Group: "DUT Setup", Order: 6)]
         [Unit("dBm", UseEngineeringPrefix: true)]
         public int AmplitudeCutOff { get; set; }
+
+        [Display("Look for a specific frequency", Group: "DUT Setup", Order: 1)]
+        [Unit("Hz", UseEngineeringPrefix: true)]
+        public Enabled <double> MatchFrequency { get; set; }
 
         //Toggles
 
@@ -68,6 +72,7 @@ namespace Tap.Plugins.FieldFoxDemo
             // Default Settings
 
             StationFrequency = new Enabled<double>() { IsEnabled = true, Value = 97000000}; ;
+            MatchFrequency = new Enabled<double>() { IsEnabled = true, Value = 88000000 };
             CenterFrequency = StationFrequency.Value;
             StartFrequency = 88000000;
             StopFrequency = 108000000;
@@ -125,6 +130,8 @@ namespace Tap.Plugins.FieldFoxDemo
             var FrequenciesFoundList = FF.FrequenciesAboveCutoff(AmplitudeCutOff, MeasurementResults, FrequencyList);
             var FrequenciesFoundArray = FrequenciesFoundList.ToArray();
 
+            var CheckFreq = FF.CheckFreq(FrequenciesFoundList, MatchFrequency.Value);
+
             
             if (IncludeGPS == true)
             {
@@ -138,20 +145,29 @@ namespace Tap.Plugins.FieldFoxDemo
             Results.PublishTable("Frequencies Above Cutoff", new List<string> { "Station Frequency(Hz)", "Station Amplitude(dBm)" }, FrequenciesFoundArray, AmplitudesAboveCutoffArray);
 
 
-            if ((EnableTestVerdict == true && AmplitudesAboveCutoffArray.Length != 0))
+            //<summary>
+            // if ((EnableTestVerdict == true && AmplitudesAboveCutoffArray.Length != 0))
+            // {
+            //     if (FrequencyArray[0] > 0 && RoundedMeasurementResultsArray[0] < 0 && FrequenciesFoundArray[0] > 0 && AmplitudesAboveCutoffArray[0] < 0)
+            //     {
+            //         UpgradeVerdict(Verdict.Pass);
+            //     }
+            // }
+            //if (AmplitudesAboveCutoffArray.Length == 0)
+            //     {
+            //       UpgradeVerdict(Verdict.Fail);
+            //     }
+            //</summary>
+
+            if (CheckFreq == true)
             {
-                if (FrequencyArray[0] > 0 && RoundedMeasurementResultsArray[0] < 0 && FrequenciesFoundArray[0] > 0 && AmplitudesAboveCutoffArray[0] < 0)
-                {
-                    UpgradeVerdict(Verdict.Pass);
-                }
+                UpgradeVerdict(Verdict.Pass);
             }
 
-           if (AmplitudesAboveCutoffArray.Length == 0)
-
-                {
-                  UpgradeVerdict(Verdict.Fail);
-                }
-
+            if (CheckFreq == false)
+            {
+                UpgradeVerdict(Verdict.Fail);
+            }
         }
 
 
