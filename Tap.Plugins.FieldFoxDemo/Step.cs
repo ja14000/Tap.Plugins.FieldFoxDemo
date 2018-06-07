@@ -86,6 +86,7 @@ namespace Tap.Plugins.FieldFoxDemo
 
             Rules.Add(() => (FreezeFF && StationFrequency.IsEnabled) != true, "Freezing the display disables speaker playback", "StationFrequency", "FreezeFF");
             Rules.Add(() => StartFrequency >= 88e6 && StartFrequency <= 108e6, "Start frequency must be greater than 88mhz and less than 108mhz", "StartFrequency");
+            Rules.Add(() => CenterFrequency >= 88e6 && CenterFrequency <= 108e6, "Center frequency must be greater than 88mhz and less than 108mhz", "CenterFrequency");
             Rules.Add(() => (StopFrequency > StartFrequency && StopFrequency <= 108e6), "Stop frequency must be greater than the Start Frequency and less than 108mhz", "StopFrequency");
             Rules.Add(() => (MatchFrequency.IsEnabled == true && EnableTestVerdict == true || MatchFrequency.IsEnabled == false && EnableTestVerdict == false), "You must set a match frequency get a verdict", "MatchFrequency", "EnableTestVerdict");
         }
