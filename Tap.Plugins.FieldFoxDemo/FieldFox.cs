@@ -160,7 +160,6 @@ namespace Tap.Plugins.FieldFoxDemo
 
         }
 
-
         //<summary>
         // This function generates a list of frequencies based on the start frequency, stop frequency and number of points that are
         // displayed on the FieldFox. These frequency values are used on the x-axis of the 'FM Spectrum View' plot and for later operations.

@@ -72,7 +72,7 @@ namespace Tap.Plugins.FieldFoxDemo
             // Default Settings
 
             StationFrequency = new Enabled<double>() { IsEnabled = true, Value = 97000000}; ;
-            MatchFrequency = new Enabled<double>() { IsEnabled = true, Value = 88000000 };
+            MatchFrequency = new Enabled<double>() { IsEnabled = false, Value = 88000000 };
             CenterFrequency = StationFrequency.Value;
             StartFrequency = 88000000;
             StopFrequency = 108000000;
@@ -80,13 +80,14 @@ namespace Tap.Plugins.FieldFoxDemo
             PresetYesNo = false;
             IncludeGPS = true;
             FreezeFF = false;
-            EnableTestVerdict = true;
+            EnableTestVerdict = false;
 
             //Rules
 
             Rules.Add(() => (FreezeFF && StationFrequency.IsEnabled) != true, "Freezing the display disables speaker playback", "StationFrequency", "FreezeFF");
             Rules.Add(() => StartFrequency >= 88e6 && StartFrequency <= 108e6, "Start frequency must be greater than 88mhz and less than 108mhz", "StartFrequency");
             Rules.Add(() => (StopFrequency > StartFrequency && StopFrequency <= 108e6), "Stop frequency must be greater than the Start Frequency and less than 108mhz", "StopFrequency");
+            Rules.Add(() => (MatchFrequency.IsEnabled == true && EnableTestVerdict == true || MatchFrequency.IsEnabled == false && EnableTestVerdict == false), "You must select a frequency to find to get a verdict", "MatchFrequency", "EnableTestVerdict");
         }
 
         public override void PrePlanRun()
@@ -130,9 +131,8 @@ namespace Tap.Plugins.FieldFoxDemo
             var FrequenciesFoundList = FF.FrequenciesAboveCutoff(AmplitudeCutOff, MeasurementResults, FrequencyList);
             var FrequenciesFoundArray = FrequenciesFoundList.ToArray();
 
-            var CheckFreq = FF.CheckFreq(FrequenciesFoundList, MatchFrequency.Value);
-
             
+       
             if (IncludeGPS == true)
             {
                 Results.PublishTable("Location/Date/Time of Scan: " + GPSDATA, new List<string> { "Frequency(Hz)", "Amplitude(dBm)" }, FrequencyArray, RoundedMeasurementResultsArray);
@@ -144,19 +144,20 @@ namespace Tap.Plugins.FieldFoxDemo
 
             Results.PublishTable("Frequencies Above Cutoff", new List<string> { "Station Frequency(Hz)", "Station Amplitude(dBm)" }, FrequenciesFoundArray, AmplitudesAboveCutoffArray);
 
-
-
-            if (CheckFreq == true)
+            if (MatchFrequency.IsEnabled == true)
             {
-                UpgradeVerdict(Verdict.Pass);
-            }
+                var CheckFreq = FF.CheckFreq(FrequenciesFoundList, MatchFrequency.Value);
+                if (CheckFreq == true)
+                {
+                    UpgradeVerdict(Verdict.Pass);
+                }
 
-            if (CheckFreq == false)
-            {
-                UpgradeVerdict(Verdict.Fail);
+                if (CheckFreq == false)
+                {
+                    UpgradeVerdict(Verdict.Fail);
+                }
             }
         }
-
 
         public override void PostPlanRun()
         {
