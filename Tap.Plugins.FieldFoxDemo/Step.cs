@@ -88,12 +88,13 @@ namespace Tap.Plugins.FieldFoxDemo
             Rules.Add(() => StartFrequency >= 88e6 && StartFrequency <= 108e6, "Start frequency must be greater than 88mhz and less than 108mhz", "StartFrequency");
             Rules.Add(() => CenterFrequency >= 88e6 && CenterFrequency <= 108e6, "Center frequency must be greater than 88mhz and less than 108mhz", "CenterFrequency");
             Rules.Add(() => (StopFrequency > StartFrequency && StopFrequency <= 108e6), "Stop frequency must be greater than the Start Frequency and less than 108mhz", "StopFrequency");
-            Rules.Add(() => (MatchFrequency.IsEnabled == true && EnableTestVerdict == true || MatchFrequency.IsEnabled == false && EnableTestVerdict == false), "You must set a match frequency get a verdict", "MatchFrequency", "EnableTestVerdict");
+            Rules.Add(() => (MatchFrequency.IsEnabled == true && EnableTestVerdict == true || MatchFrequency.IsEnabled == false && EnableTestVerdict == true), "You must enable the verdict feature to see if a match has been found", "MatchFrequency", "EnableTestVerdict");
         }
 
         public override void PrePlanRun()
         {
             base.PrePlanRun();
+            FF.Preset(PresetYesNo);
         }
 
         public void SetVerdict()
@@ -105,7 +106,7 @@ namespace Tap.Plugins.FieldFoxDemo
         {
 
             //Pass user defined variables to their respective functions
-            FF.Preset(PresetYesNo);
+            
             FF.RadioMode(StationFrequency.Value, StationFrequency.IsEnabled);
             FF.SAView(CenterFrequency);
             FF.ScanStations(StartFrequency, StopFrequency);
@@ -136,7 +137,7 @@ namespace Tap.Plugins.FieldFoxDemo
        
             if (IncludeGPS == true)
             {
-                Results.PublishTable("Location/Date/Time of Scan: " + GPSDATA, new List<string> { "Frequency(Hz)", "Amplitude(dBm)" }, FrequencyArray, RoundedMeasurementResultsArray);
+                Results.PublishTable("Location / Date / Time of Scan: " + GPSDATA, new List<string> { "Frequency(Hz)", "Amplitude(dBm)" }, FrequencyArray, RoundedMeasurementResultsArray);
             }
             else
             {
@@ -145,18 +146,39 @@ namespace Tap.Plugins.FieldFoxDemo
 
             Results.PublishTable("Frequencies Above Cutoff", new List<string> { "Station Frequency(Hz)", "Station Amplitude(dBm)" }, FrequenciesFoundArray, AmplitudesAboveCutoffArray);
 
-            if (MatchFrequency.IsEnabled == true)
+            if (MatchFrequency.IsEnabled == true && EnableTestVerdict == true)
             {
                 var CheckFreq = FF.CheckFreq(FrequenciesFoundList, MatchFrequency.Value);
                 if (CheckFreq == true)
                 {
                     UpgradeVerdict(Verdict.Pass);
+                    throw new TestPlan.AbortException("Match Frequency Found", true);
                 }
 
-                if (CheckFreq == false)
+                else if (CheckFreq == false)
                 {
                     UpgradeVerdict(Verdict.Fail);
+                    throw new TestPlan.AbortException("No Matching Frequency Found", true);
                 }
+            }
+
+            else if (MatchFrequency.IsEnabled == false && EnableTestVerdict == true)
+            {
+                
+                 if ((EnableTestVerdict == true && AmplitudesAboveCutoffArray.Length != 0))
+                {
+                    if (FrequencyArray[0] > 0 && RoundedMeasurementResultsArray[0] < 0 && FrequenciesFoundArray[0] > 0 && AmplitudesAboveCutoffArray[0] < 0)
+                    {
+                        UpgradeVerdict(Verdict.Pass);
+                        throw new TestPlan.AbortException("Amplitude Array Not Empty", true);
+                    }
+                }
+                if (AmplitudesAboveCutoffArray.Length == 0)
+                {
+                    UpgradeVerdict(Verdict.Fail);
+                    throw new TestPlan.AbortException("Amplitude Array Empty", true);
+                }
+                
             }
         }
 

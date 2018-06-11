@@ -53,6 +53,7 @@ namespace Tap.Plugins.FieldFoxDemo
         }
 
 
+
         //<summary>
         //Select the Spectrum Analyzer Instrument
         //Activate FM Wide listening mode
