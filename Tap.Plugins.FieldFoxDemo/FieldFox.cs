@@ -52,8 +52,6 @@ namespace Tap.Plugins.FieldFoxDemo
             base.Close();
         }
 
-
-
         //<summary>
         //Select the Spectrum Analyzer Instrument
         //Activate FM Wide listening mode
@@ -84,8 +82,7 @@ namespace Tap.Plugins.FieldFoxDemo
             {
                 ScpiCommand("TAL:DST 1");
                 ScpiCommand("SENSe:MEASurement:TAListen FMW");
-                ScpiCommand(":SENSe:TAListen:TFReq " + StationFrequency);
-                
+                ScpiCommand(":SENSe:TAListen:TFReq " + StationFrequency);    
             }
 
             if (PlayYesNo == false)
@@ -116,9 +113,14 @@ namespace Tap.Plugins.FieldFoxDemo
             ScpiCommand(":SENS:FREQ:STOP " + StopFrequency); 
         }
 
-        public double[] GetData(bool FreezeFF)
+        public void SetPoints(int PointsToSweep)
         {
-            ScpiCommand("SWE:POIN 400");
+            ScpiCommand("SWE:POIN " + PointsToSweep);
+        }
+
+        public double[] GetData(bool FreezeFF, int PointsToSweep, bool IsEnabled, int RoundTo)
+        {
+          
             ScpiCommand("TRAC1:TYPE AVG");
             ScpiCommand("DISPlay:WINDow:TRACe:Y:SCALe:AUTO");
             ScpiCommand("*OPC");
@@ -127,51 +129,57 @@ namespace Tap.Plugins.FieldFoxDemo
             if (FreezeFF == true)
             {
                 ScpiCommand("INITiate:CONTinuous 0" );
+                ScpiCommand("*OPC");
+                ScpiQuery("*OPC?");
             }
             else
             {
                 ScpiCommand("INITiate:CONTinuous 1");
+                ScpiCommand("*OPC");
+                ScpiQuery("*OPC?");
             }
-
+            
+            ScpiQuery("*OPC?");
             var data = ScpiQuery<double[]>("TRAC1:DATA?");
             ScpiQuery("*OPC?");
+
+            if (IsEnabled == true)
+            {
+                var datalist = data.ToList();
+                var x = 0;
+                foreach (double i in data)
+                {
+                    datalist[x] = Math.Round(datalist[x], RoundTo);
+                    x++;
+                }
+                data = datalist.ToArray();
+            }
+            else
+            {
+                return data;
+            }
 
             return data;
         }
 
         public string GetGPS()
         {
-            
             var storage = ScpiQuery("SYSTem:GPS:DATA?");
             storage = storage.Replace("\"", "");
             return storage; 
-        }
-
-        public List<double> RoundMeasurements(double[] MeasurementResults)
-        {
-            var RoundedMeasurementResultsList = MeasurementResults.ToList();
-            var x = 0;
-            foreach (double i in MeasurementResults)
-            {
-                RoundedMeasurementResultsList[x] = Math.Round(MeasurementResults[x], 2);
-                x++;
-            }
-
-            return RoundedMeasurementResultsList;
-
         }
 
         //<summary>
         // This function generates a list of frequencies based on the start frequency, stop frequency and number of points that are
         // displayed on the FieldFox. These frequency values are used on the x-axis of the 'FM Spectrum View' plot and for later operations.
         //</summary>
-        public List<double> CalcFrequency(double StartFrequency, double StopFrequency)
+        public List<double> CalcFrequency(double StartFrequency, double StopFrequency, int PointsToSweep)
         {
-            var FrequencyStep = ((StopFrequency - StartFrequency) / (400));
+            var FrequencyStep = ((StopFrequency - StartFrequency) / (PointsToSweep));
             List<double> FrequencyList = new List<double>();
             FrequencyList.Add(StartFrequency);
 
-            for (int runs = 0; runs < 399; runs++)
+            for (int runs = 0; runs < (PointsToSweep-1); runs++)
             {
                 FrequencyList.Add(FrequencyList[runs] + FrequencyStep);
             }
@@ -215,7 +223,6 @@ namespace Tap.Plugins.FieldFoxDemo
         public bool? CheckFreq(List<double> FrequenciesFoundList, double MatchFrequency)
         {
             bool? MatchFound = null;
-
             foreach (double i in FrequenciesFoundList)
             {
                 
@@ -228,14 +235,81 @@ namespace Tap.Plugins.FieldFoxDemo
                 {
                     MatchFound = false;
                 }
-
             }
             return MatchFound;
         }
 
-  
-    }   
-  
-  }
+        public List<Double> PointsToChannels(double StartFrequency, double StopFrequency, double ChannelSpan, bool Enabled)
+        {
+            double StartFrequencyOdd = StartFrequency + 100000;
+            double StopFrequencyOdd = StopFrequency + 100000;
+            double ChannelStart = StartFrequency;
+            double ChannelStartOdd = StartFrequency + 100000;
+
+
+            List<double> ChannelList = new List<double>();
+            if (Enabled == true)
+            {
+                while (StopFrequency >= StartFrequency)
+                {
+                    ChannelList.Add(ChannelStart);
+                    ChannelStart = StartFrequency += ChannelSpan;
+
+                    ChannelList.Add(ChannelStartOdd);
+                    ChannelStartOdd = StartFrequencyOdd += ChannelSpan;                                      
+                }
+            }
+            return ChannelList;
+        }
+
+        public List<Double> AmplitudesForChannels(List<double> ChannelList, List<double> FrequenciesAboveCutOff, List<double> AmplitudesAboveCutOff, bool Enabled)
+        {
+
+            List<double> ChannelAmplitudeList = new List<double>();
+            int x = 0;
+            foreach (double i in FrequenciesAboveCutOff)
+            {
+                var j = i;
+                var a = Math.Round(i, 0);
+                var z = a / 1000000; // this may fuck things up at lower frequeicies
+
+                var b = Math.Round(z, 1);
+                var c = b * 1000000;
+
+                if (ChannelList.Contains(c))
+                {
+                    ChannelAmplitudeList.Add(AmplitudesAboveCutOff[FrequenciesAboveCutOff.IndexOf(i)]);
+                    x++;
+                }           
+            }
+
+            return ChannelAmplitudeList;
+        }
+
+        public List<Double> FrequenciesForChannels(List<double> ChannelList, List<double> FrequenciesAboveCutOff, bool Enabled)
+        {
+            List<double> ChannelFrequencyList = new List<double>();
+            int x = 0;
+            foreach (double i in FrequenciesAboveCutOff)
+            {
+                var j = i;
+                var a = Math.Round(i, 0);
+                var z = a / 1000000;
+               
+                var b = Math.Round(z, 1);
+                var c = b * 1000000;
+                if (ChannelList.Contains(c))
+                {
+                    ChannelFrequencyList.Add(c);
+                    x++;
+                }               
+            }
+
+            return ChannelFrequencyList;
+        }      
+
+    }
+
+}
 
 
