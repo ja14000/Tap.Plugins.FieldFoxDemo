@@ -93,7 +93,7 @@ namespace Tap.Plugins.FieldFoxDemo
             FreezeFF = false;
             EnableTestVerdict = false;
             PointsToSweep = 300;
-            RoundTo = new Enabled<int>() { IsEnabled = false, Value = 2 }; ;
+            RoundTo = new Enabled<int>() { IsEnabled = false, Value = 2 }; 
 
             //Rules
 
@@ -111,7 +111,7 @@ namespace Tap.Plugins.FieldFoxDemo
             FF.Preset(PresetYesNo);
             FF.SetPoints(PointsToSweep);
             //Initial array of amplitudes collected by the fieldfox
-            var MeasurementResults = FF.GetData(FreezeFF, PointsToSweep, RoundTo.IsEnabled, RoundTo.Value);
+            var MeasurementResults = FF.GetData(FreezeFF, PointsToSweep, RoundTo.IsEnabled, RoundTo.Value); //Needs to be here because changing the sweep points sometimes does not update everywhere causing a crash when generating the table
         }
 
         public void SetVerdict()
@@ -122,7 +122,7 @@ namespace Tap.Plugins.FieldFoxDemo
         public override void Run()
         {
             //Initial array of amplitudes collected by the fieldfox - Needs to be here again so the variable exists in this context
-           var MeasurementResults = FF.GetData(FreezeFF, PointsToSweep, RoundTo.IsEnabled, RoundTo.Value);
+            var MeasurementResults = FF.GetData(FreezeFF, PointsToSweep, RoundTo.IsEnabled, RoundTo.Value);
 
             //Pass user defined variables to their respective functions
 
@@ -145,15 +145,12 @@ namespace Tap.Plugins.FieldFoxDemo
             var FrequenciesFoundList = FF.FrequenciesAboveCutoff(AmplitudeCutOff, MeasurementResults, FrequencyList);
             var FrequenciesFoundArray = FrequenciesFoundList.ToArray();
 
-
-
             // Sort Frequencies & Amplitudes above cut off into channels
             var PointsToChannels = FF.PointsToChannels(StartFrequency, StopFrequency,ChannelSpan.Value, ChannelSpan.IsEnabled);
 
             var AmplitudesForChannels = FF.AmplitudesForChannels(PointsToChannels, FrequenciesFoundList, StationsFoundList, ChannelSpan.IsEnabled);
 
             var FrequenciesForChannels = FF.FrequenciesForChannels(PointsToChannels, FrequenciesFoundList, ChannelSpan.IsEnabled);
-
 
             // Results Publishing
             if (IncludeGPS == true)
@@ -171,7 +168,6 @@ namespace Tap.Plugins.FieldFoxDemo
             {
                 Results.PublishTable("Channels", new List<string> { "Station Frequency(Hz)", "Station Amplitude(dBm)" }, FrequenciesForChannels.ToArray(), AmplitudesForChannels.ToArray());
             }
-
 
             //Verdict Logic
 
