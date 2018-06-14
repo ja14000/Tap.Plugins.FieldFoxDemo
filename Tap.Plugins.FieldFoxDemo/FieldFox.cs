@@ -196,7 +196,7 @@ namespace Tap.Plugins.FieldFoxDemo
             foreach (double i in FrequenciesFoundList)
             {
                 
-                if (FrequenciesFoundList.Contains(MatchFrequency))
+                if (FrequenciesFoundList.Contains(MatchFrequency) )
                 {
                     MatchFound = true;
                     break;
@@ -205,6 +205,7 @@ namespace Tap.Plugins.FieldFoxDemo
                 {
                     MatchFound = false;
                 }
+
             }
             return MatchFound;
         }
@@ -215,7 +216,6 @@ namespace Tap.Plugins.FieldFoxDemo
             double StopFrequencyOdd = StopFrequency + 100000;
             double ChannelStart = StartFrequency;
             double ChannelStartOdd = StartFrequency + 100000;
-
 
             List<double> ChannelList = new List<double>();
             if (Enabled == true)

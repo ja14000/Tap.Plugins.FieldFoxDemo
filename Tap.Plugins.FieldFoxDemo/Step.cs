@@ -106,7 +106,6 @@ namespace Tap.Plugins.FieldFoxDemo
             base.PrePlanRun();
             FF.Preset(PresetYesNo);
             FF.SetPoints(PointsToSweep);
-            //Initial array of amplitudes collected by the fieldfox
             var MeasurementResults = FF.GetData(FreezeFF, PointsToSweep); //Needs to be here because changing the sweep points sometimes does not update everywhere causing a crash when generating the table
         }
 
@@ -120,9 +119,7 @@ namespace Tap.Plugins.FieldFoxDemo
             //Initial array of amplitudes collected by the fieldfox - Needs to be here again so the variable exists in this context
             var MeasurementResults = FF.GetData(FreezeFF, PointsToSweep);
            
-
             //Pass user defined variables to their respective functions
-
             FF.RadioMode(StationFrequency.Value, StationFrequency.IsEnabled);
             FF.SAView(CenterFrequency);
             FF.ScanStations(StartFrequency, StopFrequency);
@@ -144,9 +141,7 @@ namespace Tap.Plugins.FieldFoxDemo
 
             // Sort Frequencies & Amplitudes above cut off into channels
             var PointsToChannels = FF.PointsToChannels(StartFrequency, StopFrequency,ChannelSpan.Value, ChannelSpan.IsEnabled);
-
             var AmplitudesForChannels = FF.AmplitudesForChannels(PointsToChannels, FrequenciesFoundList, StationsFoundList, ChannelSpan.IsEnabled);
-
             var FrequenciesForChannels = FF.FrequenciesForChannels(PointsToChannels, FrequenciesFoundList, ChannelSpan.IsEnabled);
 
             // Results Publishing
@@ -204,12 +199,10 @@ namespace Tap.Plugins.FieldFoxDemo
             }
            
         }
+
         public override void PostPlanRun()
         {
             base.PostPlanRun();
-           
-
-
         }
     }
 
