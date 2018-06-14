@@ -118,7 +118,7 @@ namespace Tap.Plugins.FieldFoxDemo
             ScpiCommand("SWE:POIN " + PointsToSweep);
         }
 
-        public double[] GetData(bool FreezeFF, int PointsToSweep, bool IsEnabled, int RoundTo)
+        public double[] GetData(bool FreezeFF, int PointsToSweep)
         {
           
             ScpiCommand("TRAC1:TYPE AVG");
@@ -142,22 +142,6 @@ namespace Tap.Plugins.FieldFoxDemo
             ScpiQuery("*OPC?");
             var data = ScpiQuery<double[]>("TRAC1:DATA?");
             ScpiQuery("*OPC?");
-
-            if (IsEnabled == true)
-            {
-                var datalist = data.ToList();
-                var x = 0;
-                foreach (double i in data)
-                {
-                    datalist[x] = Math.Round(datalist[x], RoundTo);
-                    x++;
-                }
-                data = datalist.ToArray();
-            }
-            else
-            {
-                return data;
-            }
 
             return data;
         }
@@ -195,43 +179,13 @@ namespace Tap.Plugins.FieldFoxDemo
             return AmplitudesAboveCutoff; 
         }
 
-        //<summary>
-        // This function takes the array of amplitude data gathered by the fieldfox(MeasurementResults) and for any
-        // amplitude value greater than the 'AmplitudeCutOff' variable it adds the 'FrequencyList' value with the same
-        // index array to a new array called 'FrequenciesAboveCutoff'array is returned in the last step. We now have
-        // an array of Frequency values for the AmplitudesAboveCutoff array created in the previous step.
-        //</summary>
-        //public List<double> FrequenciesAboveCutoff(int AmplitudeCutOff, double[] MeasurementResults, List<double> FrequencyList)
-        //{
-        //    List<double> FrequenciesAboveCutoff = new List<double>();
-        //    var x = 0;
-        //    foreach (double i in MeasurementResults)
-        //    {
-        //        if (MeasurementResults[x] > AmplitudeCutOff)
-        //        {
-        //            FrequenciesAboveCutoff.Add(FrequencyList[x]);
-        //            x++;
-        //        }
-        //        else
-        //        {
-        //            x++;
-        //        }
-        //    }
-        //    return FrequenciesAboveCutoff; 
-        //}
 
-
-        public List<double> FrequenciesAboveCutoff(int AmplitudeCutOff, double[] AmplitudesAboveCutOff, List<double> FrequencyList, List<double> MeasurementResults)
+        public List<double> FrequenciesAboveCutoff(double[] AmplitudesAboveCutOff, List<double> FrequencyList, List<double> MeasurementResults)
         {
             List<double> FrequenciesAboveCutoff = new List<double>();
-            //var x = 0;
-            //var temp = AmplitudesAboveCutOff.ToList();
             foreach (double i in AmplitudesAboveCutOff)
             {
-               FrequenciesAboveCutoff.Add(FrequencyList[MeasurementResults.IndexOf(i)]);
-                   // x++;
-                
-                
+               FrequenciesAboveCutoff.Add(FrequencyList[MeasurementResults.IndexOf(i)]);   
             }
             return FrequenciesAboveCutoff;
         }
@@ -287,7 +241,7 @@ namespace Tap.Plugins.FieldFoxDemo
             {
                 var j = i;
                 var a = Math.Round(i, 0);
-                var z = a / 1000000; // this may fuck things up at lower frequeicies
+                var z = a / 1000000; // this might fuck things up at lower frequeicies
 
                 var b = Math.Round(z, 1);
                 var c = b * 1000000;
@@ -324,6 +278,17 @@ namespace Tap.Plugins.FieldFoxDemo
             return ChannelFrequencyList;
         }      
 
+        public List<Double> RoundedResults(List<double> ListToRound, int RoundTo)
+        {
+            var RoundedList = new List<double>();
+            foreach (double i in ListToRound)
+            {
+               RoundedList.Add(Math.Round(i, RoundTo));
+            }
+
+            return RoundedList;
+      
+        }
     }
 
 }

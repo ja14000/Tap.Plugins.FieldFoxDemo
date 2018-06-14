@@ -39,13 +39,10 @@ namespace Tap.Plugins.FieldFoxDemo
 
         [Display("Amplitude Cut Off", Group: "DUT Setup", Order: 6)]
         [Unit("dBm", UseEngineeringPrefix: true)]
-        public int AmplitudeCutOff { get; set; }
+        public Enabled <int> AmplitudeCutOff { get; set; }
 
         [Display("Points to Sweep", Group: "DUT Setup", Order: 6)]
         public int PointsToSweep { get; set; }
-
-        [Display("Decimal Places To Round Amplitude Values", Group: "DUT Setup", Order: 8)]
-        public Enabled <int> RoundTo { get; set; }
 
         [Display("Channel Span", Group: "DUT Setup", Order: 7)]
         [Unit("Hz", UseEngineeringPrefix: true)]
@@ -87,13 +84,12 @@ namespace Tap.Plugins.FieldFoxDemo
             StartFrequency = 88000000;
             StopFrequency = 108000000;
             ChannelSpan = new Enabled<double>() { IsEnabled = false, Value = 100000}; ;
-            AmplitudeCutOff = -80;
+            AmplitudeCutOff = new Enabled<int>() { IsEnabled = true, Value = -100 };
             PresetYesNo = false;
             IncludeGPS = true;
             FreezeFF = false;
             EnableTestVerdict = false;
             PointsToSweep = 300;
-            RoundTo = new Enabled<int>() { IsEnabled = false, Value = 2 }; 
 
             //Rules
 
@@ -101,7 +97,7 @@ namespace Tap.Plugins.FieldFoxDemo
             Rules.Add(() => StartFrequency >= 88e6 && StartFrequency <= 108e6, "Start frequency must be greater than 88mhz and less than 108mhz", "StartFrequency");
             Rules.Add(() => CenterFrequency >= 88e6 && CenterFrequency <= 108e6, "Center frequency must be greater than 88mhz and less than 108mhz", "CenterFrequency");
             Rules.Add(() => (StopFrequency > StartFrequency && StopFrequency <= 108e6), "Stop frequency must be greater than the Start Frequency and less than 108mhz", "StopFrequency");
-            Rules.Add(() => (MatchFrequency.IsEnabled == true && EnableTestVerdict == true || MatchFrequency.IsEnabled == false && EnableTestVerdict == true), "You must enable the verdict feature to see if a match has been found", "MatchFrequency", "EnableTestVerdict");
+            Rules.Add(() => (MatchFrequency.IsEnabled == true && EnableTestVerdict == true || MatchFrequency.IsEnabled == false && EnableTestVerdict == true || MatchFrequency.IsEnabled == false && EnableTestVerdict == false), "You must enable the verdict feature to see if a match has been found", "MatchFrequency", "EnableTestVerdict");
             Rules.Add(() => PointsToSweep < 10001, "You cannot sweep more than 10001 points", "PointsToSweep");
         }
 
@@ -111,7 +107,7 @@ namespace Tap.Plugins.FieldFoxDemo
             FF.Preset(PresetYesNo);
             FF.SetPoints(PointsToSweep);
             //Initial array of amplitudes collected by the fieldfox
-            var MeasurementResults = FF.GetData(FreezeFF, PointsToSweep, RoundTo.IsEnabled, RoundTo.Value); //Needs to be here because changing the sweep points sometimes does not update everywhere causing a crash when generating the table
+            var MeasurementResults = FF.GetData(FreezeFF, PointsToSweep); //Needs to be here because changing the sweep points sometimes does not update everywhere causing a crash when generating the table
         }
 
         public void SetVerdict()
@@ -122,7 +118,8 @@ namespace Tap.Plugins.FieldFoxDemo
         public override void Run()
         {
             //Initial array of amplitudes collected by the fieldfox - Needs to be here again so the variable exists in this context
-            var MeasurementResults = FF.GetData(FreezeFF, PointsToSweep, RoundTo.IsEnabled, RoundTo.Value);
+            var MeasurementResults = FF.GetData(FreezeFF, PointsToSweep);
+           
 
             //Pass user defined variables to their respective functions
 
@@ -138,7 +135,7 @@ namespace Tap.Plugins.FieldFoxDemo
             var FrequencyArray = FrequencyList.ToArray();
 
             //Array of Amplitudes greater than the amplitue cutoff i.e. 'Stations'
-            var AmplitudesAboveCutoffArray = FF.AmplitudesAboveCutoff(AmplitudeCutOff, MeasurementResults);
+            var AmplitudesAboveCutoffArray = FF.AmplitudesAboveCutoff(AmplitudeCutOff.Value, MeasurementResults);
             var StationsFoundList = AmplitudesAboveCutoffArray.ToList();
 
             // List of frquencies for each 'Station(Amplitude)' value
@@ -157,20 +154,20 @@ namespace Tap.Plugins.FieldFoxDemo
             {
                 Results.PublishTable("Location / Date / Time of Scan: " + GPSDATA, new List<string> { "Frequency(Hz)", "Amplitude(dBm)" }, FrequencyArray, MeasurementResults);
             }
-            else
+            else if (IncludeGPS == false)
             {
                 Results.PublishTable("Channels Frequencies", new List<string> { "Frequency(Hz)", "Amplitude(dBm)" }, FrequencyArray, MeasurementResults);
+            }           
+            if (AmplitudeCutOff.IsEnabled == true)
+            {
+                Results.PublishTable("Frequencies Above Cutoff", new List<string> { "Station Frequency(Hz)", "Station Amplitude(dBm)" }, FrequenciesFoundArray, AmplitudesAboveCutoffArray);
             }
-
-            Results.PublishTable("Frequencies Above Cutoff", new List<string> { "Station Frequency(Hz)", "Station Amplitude(dBm)" }, FrequenciesFoundArray, AmplitudesAboveCutoffArray);
-
             if (ChannelSpan.IsEnabled == true)
             {
                 Results.PublishTable("Channels", new List<string> { "Station Frequency(Hz)", "Station Amplitude(dBm)" }, FrequenciesForChannels.ToArray(), AmplitudesForChannels.ToArray());
             }
 
             //Verdict Logic
-
             if (MatchFrequency.IsEnabled == true && EnableTestVerdict == true)
             {
                 var CheckFreq = FF.CheckFreq(FrequenciesFoundList, MatchFrequency.Value);
