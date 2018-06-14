@@ -201,23 +201,39 @@ namespace Tap.Plugins.FieldFoxDemo
         // index array to a new array called 'FrequenciesAboveCutoff'array is returned in the last step. We now have
         // an array of Frequency values for the AmplitudesAboveCutoff array created in the previous step.
         //</summary>
-        public List<double> FrequenciesAboveCutoff(int AmplitudeCutOff, double[] MeasurementResults, List<double> FrequencyList)
+        //public List<double> FrequenciesAboveCutoff(int AmplitudeCutOff, double[] MeasurementResults, List<double> FrequencyList)
+        //{
+        //    List<double> FrequenciesAboveCutoff = new List<double>();
+        //    var x = 0;
+        //    foreach (double i in MeasurementResults)
+        //    {
+        //        if (MeasurementResults[x] > AmplitudeCutOff)
+        //        {
+        //            FrequenciesAboveCutoff.Add(FrequencyList[x]);
+        //            x++;
+        //        }
+        //        else
+        //        {
+        //            x++;
+        //        }
+        //    }
+        //    return FrequenciesAboveCutoff; 
+        //}
+
+
+        public List<double> FrequenciesAboveCutoff(int AmplitudeCutOff, double[] AmplitudesAboveCutOff, List<double> FrequencyList, List<double> MeasurementResults)
         {
             List<double> FrequenciesAboveCutoff = new List<double>();
-            var x = 0;
-            foreach (double i in MeasurementResults)
+            //var x = 0;
+            //var temp = AmplitudesAboveCutOff.ToList();
+            foreach (double i in AmplitudesAboveCutOff)
             {
-                if (MeasurementResults[x] > AmplitudeCutOff)
-                {
-                    FrequenciesAboveCutoff.Add(FrequencyList[x]);
-                    x++;
-                }
-                else
-                {
-                    x++;
-                }
+               FrequenciesAboveCutoff.Add(FrequencyList[MeasurementResults.IndexOf(i)]);
+                   // x++;
+                
+                
             }
-            return FrequenciesAboveCutoff; 
+            return FrequenciesAboveCutoff;
         }
 
         public bool? CheckFreq(List<double> FrequenciesFoundList, double MatchFrequency)

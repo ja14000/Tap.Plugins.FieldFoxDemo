@@ -81,7 +81,7 @@ namespace Tap.Plugins.FieldFoxDemo
         {
             // Default Settings
 
-            StationFrequency = new Enabled<double>() { IsEnabled = true, Value = 97000000}; ;
+            StationFrequency = new Enabled<double>() { IsEnabled = false, Value = 97000000}; ;
             MatchFrequency = new Enabled<double>() { IsEnabled = false, Value = 88000000};
             CenterFrequency = StationFrequency.Value;
             StartFrequency = 88000000;
@@ -142,7 +142,7 @@ namespace Tap.Plugins.FieldFoxDemo
             var StationsFoundList = AmplitudesAboveCutoffArray.ToList();
 
             // List of frquencies for each 'Station(Amplitude)' value
-            var FrequenciesFoundList = FF.FrequenciesAboveCutoff(AmplitudeCutOff, MeasurementResults, FrequencyList);
+            var FrequenciesFoundList = FF.FrequenciesAboveCutoff(AmplitudesAboveCutoffArray, FrequencyList, MeasurementResults.ToList());
             var FrequenciesFoundArray = FrequenciesFoundList.ToArray();
 
             // Sort Frequencies & Amplitudes above cut off into channels
