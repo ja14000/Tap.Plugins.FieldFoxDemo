@@ -84,20 +84,16 @@ namespace Tap.Plugins.FieldFoxDemo
         //</summary>
         public void SetListen(double StationFrequency, bool PlayYesNo)
         {
-            //ScpiCommand(@"INSTrument:SELect ""SA"""); 
-
             if(PlayYesNo == true)
             {
                 ScpiCommand("TAL:DST 1");
                 ScpiCommand("SENSe:MEASurement:TAListen FMW");
                 ScpiCommand(":SENSe:TAListen:TFReq " + StationFrequency);    
             }
-
             if (PlayYesNo == false)
             {  
                 ScpiCommand("TAL:DST 0");
             }
-
             ScpiCommand(":SENSe:POWer:RF:GAIN:STATe 1");
         }
 
@@ -125,23 +121,15 @@ namespace Tap.Plugins.FieldFoxDemo
           
             ScpiCommand("TRAC1:TYPE AVG");
             ScpiCommand("DISPlay:WINDow:TRACe:Y:SCALe:AUTO");
-            //ScpiCommand("*OPC");
-            //ScpiQuery("*OPC?");
-
+          
             if (FreezeFF == true)
             {
-                ScpiCommand("INITiate:CONTinuous 0" );
-                //ScpiCommand("*OPC");
-               //ScpiQuery("*OPC?");
+                ScpiCommand("INITiate:CONTinuous 0" );              
             }
             else
             {
-                ScpiCommand("INITiate:CONTinuous 1");
-                //ScpiCommand("*OPC");
-                //ScpiQuery("*OPC?");
-            }
-            
-            //ScpiQuery("*OPC?");
+                ScpiCommand("INITiate:CONTinuous 1");           
+            }            
             var data = ScpiQuery<double[]>("TRAC1:DATA?");
             ScpiQuery("*OPC?");
 
@@ -199,8 +187,7 @@ namespace Tap.Plugins.FieldFoxDemo
         {
             bool? MatchFound = null;
             foreach (double i in FrequenciesFoundList)
-            {
-                
+            {           
                 if (FrequenciesFoundList.Contains(MatchFrequency))
                 {
                     MatchFound = true;
@@ -210,7 +197,6 @@ namespace Tap.Plugins.FieldFoxDemo
                 {
                     MatchFound = false;
                 }
-
             }
             return MatchFound;
         }
@@ -228,6 +214,7 @@ namespace Tap.Plugins.FieldFoxDemo
             double ChannelStartOdd = StartFrequency + 100000;
 
             List<double> ChannelList = new List<double>();
+
             if (Enabled == true)
             {
                 while (StopFrequency >= StartFrequency)
@@ -251,7 +238,6 @@ namespace Tap.Plugins.FieldFoxDemo
         //<summary>
         public List<Double> AmplitudesForChannels(List<double> ChannelList, List<double> FrequenciesAboveCutOff, List<double> AmplitudesAboveCutOff, bool Enabled)
         {
-
             List<double> ChannelAmplitudeList = new List<double>();
             int x = 0;
             foreach (double i in FrequenciesAboveCutOff)
@@ -267,7 +253,6 @@ namespace Tap.Plugins.FieldFoxDemo
                     x++;
                 }           
             }
-
             return ChannelAmplitudeList;
         }
 
