@@ -50,7 +50,6 @@ namespace Tap.Plugins.FieldFoxDemo
         [Unit("Hz", UseEngineeringPrefix: true)]
         public Enabled<double> ChannelSpan { get; set; }
 
-
         //Toggles
 
         [Display("Preset Instrument", Group: "Other Settings", Order: 1)]

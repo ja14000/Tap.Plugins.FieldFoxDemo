@@ -161,7 +161,7 @@ namespace Tap.Plugins.FieldFoxDemo
         }
 
         //<summary>
-        // Returns a list of Amplitudes from the MeasurementResults array that have a value greater than the 'AmplitudeCutoff' variable
+        // Returns a list of Amplitudes from the MeasurementResults array that have a value greater than the 'AmplitudeCutoff' variable.
         //</summary>
         public double[] AmplitudesAboveCutoff(int AmplitudeCutOff, double[] MeasurementResults)
         {
