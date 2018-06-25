@@ -175,12 +175,14 @@ namespace Tap.Plugins.FieldFoxDemo
                 {
                     UpgradeVerdict(Verdict.Pass);
                     //throw new TestPlan.AbortException("Match Frequency Found", true);
+                    //throw new Exception("Hi Mom");
                 }
 
                 else if (CheckFreq == false)
                 {
                     UpgradeVerdict(Verdict.Fail);
                     //throw new TestPlan.AbortException("No Matching Frequency Found", true);
+                    //throw new Exception("Hi Mom");
                 }
             }
 
@@ -191,7 +193,8 @@ namespace Tap.Plugins.FieldFoxDemo
                     if (FrequencyArray[0] > 0 && MeasurementResults[0] < 0 && FrequenciesFoundArray[0] > 0 && AmplitudesAboveCutoffArray[0] < 0)
                     {
                         UpgradeVerdict(Verdict.Pass);
-                       // throw new TestPlan.AbortException("Amplitude Array Not Empty", true);
+                        // throw new TestPlan.AbortException("Amplitude Array Not Empty", true);
+                        //throw new Exception("Hi Mom");
                     }
                 }
 
@@ -199,6 +202,7 @@ namespace Tap.Plugins.FieldFoxDemo
                 {
                     UpgradeVerdict(Verdict.Fail);
                     //throw new TestPlan.AbortException("Amplitude Array Empty", true);
+                    //throw new Exception("Hi Mom");
                 }            
             }
            

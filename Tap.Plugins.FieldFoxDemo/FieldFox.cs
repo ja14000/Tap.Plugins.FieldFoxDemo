@@ -53,6 +53,11 @@ namespace Tap.Plugins.FieldFoxDemo
             base.Close();
         }
 
+
+        //<summary>
+        //Select Spectrum Analyzer instrument
+        //Set no. of sweep points
+        //</summary>
         public void PrePlanSetup(int PointsToSweep)
         {
             ScpiCommand(@"INSTrument:SELect ""SA""");
@@ -60,11 +65,10 @@ namespace Tap.Plugins.FieldFoxDemo
             ScpiCommand("SWE:POIN " + PointsToSweep);
         }
 
+
+
         //<summary>
-        //Select the Spectrum Analyzer Instrument
-        //Activate FM Wide listening mode
-        //Tune to radio station
-        //Turn On the Pre-Amp
+        //Preset instrument ( if user chooses to)
         //</summary>
         public void Preset(bool PresetYesNo)
         {
@@ -77,10 +81,8 @@ namespace Tap.Plugins.FieldFoxDemo
         }
 
         //<summary>
-        //Select the Spectrum Analyzer Instrument
-        //Activate FM Wide listening mode if user has selected
-        //Tune to radio station if user has selected
-        //Turn On the Pre-Amp
+        //Play radio through speakers ( if user chosoes to)
+        //Turn on RF gain
         //</summary>
         public void SetListen(double StationFrequency, bool PlayYesNo)
         {
@@ -98,7 +100,7 @@ namespace Tap.Plugins.FieldFoxDemo
         }
 
         //<summary>
-        //Set the center frequency to the value held in the CenterFrequecy
+        //Set the center frequency of the instrument to the value in CenterFrequency
         //<summary>
         public void SetDisplay(double CenterFrequency)
         {
@@ -107,14 +109,21 @@ namespace Tap.Plugins.FieldFoxDemo
         }
 
         //<summary>
-        //Set Start Frequency
-        //Set StopFrequency
+        //Set Start Frequency of the instrument
+        //Set Stop Frequency of the instrument
         //<summary>
         public void SetFrequencies(double StartFrequency, double StopFrequency)
         {
             ScpiCommand(":SENS:FREQ:STAR " + StartFrequency); 
             ScpiCommand(":SENS:FREQ:STOP " + StopFrequency); 
         }
+
+        //<summary>
+        //Set instrument trace type to average
+        //Set the display to auto scale
+        //Freeze the intrument's display (if the user chooses to)
+        //Get trace data from instrument and store it in an array
+        //<summary>
 
         public double[] GetData(bool FreezeFF, int PointsToSweep)
         {
@@ -124,7 +133,7 @@ namespace Tap.Plugins.FieldFoxDemo
           
             if (FreezeFF == true)
             {
-                ScpiCommand("INITiate:CONTinuous 0" );              
+                ScpiCommand("INITiate:CONTinuous 0");              
             }
             else
             {
@@ -136,6 +145,10 @@ namespace Tap.Plugins.FieldFoxDemo
             return data;
         }
 
+        //<summary>
+        //Get GPS data from the instrument
+        //Remove backslashes from the string returned by the instrument
+        //<summary>
         public string GetGPS()
         {
             var storage = ScpiQuery("SYSTem:GPS:DATA?");
@@ -161,7 +174,7 @@ namespace Tap.Plugins.FieldFoxDemo
         }
 
         //<summary>
-        // Returns a list of Amplitudes from the MeasurementResults array that have a value greater than the 'AmplitudeCutoff' variable.
+        //This function returns a list of all Amplitudes in the MeasurementResults array that have a value greater than the 'AmplitudeCutoff' variable.
         //</summary>
         public double[] AmplitudesAboveCutoff(int AmplitudeCutOff, double[] MeasurementResults)
         {
@@ -180,8 +193,8 @@ namespace Tap.Plugins.FieldFoxDemo
         }
 
         //<summary>
-        // This function checks if the value chosen by the user (CheckFreq) is in the FreqienciesFoundList. If it is it returs 'true' and the validation shows a 'pass' for
-        //'false' the validation shows 'fail'.
+        // This function checks if the value chosen by the user (CheckFreq) is in the FreqienciesFoundList. If the value in CheckFreq is present in FrequenciesFoundList the validation shows a 'pass'
+        // else the validation shows 'fail'.
         //</summary>
         public bool? FrequencyMatch(List<double> FrequenciesFoundList, double MatchFrequency)
         {
@@ -225,6 +238,7 @@ namespace Tap.Plugins.FieldFoxDemo
                     ChannelList.Add(ChannelStartOdd);
                     ChannelStartOdd = StartFrequencyOdd += ChannelSpan;                                      
                 }
+
             }
             return ChannelList;
         }
@@ -283,7 +297,13 @@ namespace Tap.Plugins.FieldFoxDemo
             return ChannelFrequencyList;
         }
 
-        
+        //public List<Double> AveragedChannels(List<double> ChannelFrequencyList, List<double> ChannelAmplitudeList)
+        //{
+        //    List<double> NewAmplitudeList = new List<double>();
+
+        //   foreach (int i in ChannelFrequencyList)
+        //}
+
     }
 
 }
